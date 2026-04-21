@@ -109,14 +109,13 @@ const isPlayer = window.location.href.includes('role=player');
         />
       );
     
-    case 'just_one':
-      return (
-        <JustOneGame 
-          roomId={roomId} 
-          gameData={gameData} 
-          isHost={!isPlayer} 
-        />
-      );
+      case 'just_one':
+        return (
+          <JustOneGame 
+            roomId={roomId} 
+            gameData={gameData} 
+          />
+        );
 
     default:
       return (
