@@ -1,15 +1,14 @@
 import { useState, useEffect } from 'react';
-import { supabase } from './supabaseClient';
-import { Timer, UserCircle, CheckCircle } from 'lucide-react';
+import { Timer } from 'lucide-react';
 
 interface JustOneProps {
   roomId: string;
   gameData: any; // ה-Payload מהגמיני (רשימת המילים)
-  isHost: boolean;
+  // הסרנו את isHost כי הוא לא בשימוש כרגע
 }
 
-export default function JustOneGame({ roomId, gameData, isHost }: JustOneProps) {
-  const [stage, setStage] = useState('SHOW_WORD'); // מתחילים ישר מהמילים כי הנתונים כבר כאן
+export default function JustOneGame({ roomId, gameData }: JustOneProps) {
+  const [stage, setStage] = useState('SHOW_WORD');
   const [currentRound, setCurrentRound] = useState(0);
   const [timer, setTimer] = useState(10);
 
@@ -43,7 +42,6 @@ export default function JustOneGame({ roomId, gameData, isHost }: JustOneProps) 
     }
   }
 
-  // עיצוב בסיסי (inline לטובת הפשטות בקובץ אחד)
   const containerStyle: React.CSSProperties = {
     fontFamily: 'system-ui, sans-serif',
     textAlign: 'center',
@@ -82,7 +80,7 @@ export default function JustOneGame({ roomId, gameData, isHost }: JustOneProps) 
         <div>
           <h2 style={{ color: '#aaa' }}>שלב 2: כותבים רמזים! ✍️</h2>
           <p style={{ fontSize: '1.4rem', marginBottom: '40px' }}>
-            כתבו רמז בן מילה אחת על דף או בטלפון (לא כאן).
+            כתבו רמז בן מילה אחת על דף או בטלפון.
           </p>
           <div style={{ fontSize: '60px', fontWeight: 'bold', marginBottom: '40px' }}>
             {timer}
