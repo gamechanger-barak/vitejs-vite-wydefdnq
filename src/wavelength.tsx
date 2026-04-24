@@ -19,7 +19,6 @@ interface GameData {
 interface WavelengthProps {
   gameData: GameData;
   roomId: string;
-  isHost: boolean;
 }
 
 // ── רכיב עזר ל-QR Code ─────────────────────────────────────────────────────
@@ -43,7 +42,7 @@ const PHASE = {
   REVEAL: "reveal",
 };
 
-export default function WavelengthGame({ gameData, roomId, isHost }: WavelengthProps) {
+export default function WavelengthGame({ gameData, roomId }: WavelengthProps) {
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [target, setTarget] = useState(0);
   const [guess, setGuess] = useState(0);

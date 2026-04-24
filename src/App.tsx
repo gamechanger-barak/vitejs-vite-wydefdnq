@@ -115,7 +115,6 @@ const isPlayer = window.location.href.includes('role=player');
         <JustOneGame 
           roomId={roomId} 
           gameData={gameData} 
-          isHost={!isPlayer} 
         />
       );
       case 'wavelength':
@@ -124,7 +123,6 @@ const isPlayer = window.location.href.includes('role=player');
         <WavelengthGame 
           roomId={roomId} 
           gameData={gameData} // הנתונים שנשלפו מהעמודה 'payload'
-          isHost={!isPlayer} 
         />
       );
 
