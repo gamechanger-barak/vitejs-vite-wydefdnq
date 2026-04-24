@@ -119,6 +119,7 @@ const isPlayer = window.location.href.includes('role=player');
         />
       );
       case 'wavelength':
+
       return (
         <WavelengthGame 
           roomId={roomId} 
