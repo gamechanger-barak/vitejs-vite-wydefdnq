@@ -11,7 +11,6 @@ interface WavelengthCard {
 interface WavelengthProps {
   gameData: any; 
   roomId: string;
-  isHost: boolean;
 }
 
 function QRCode({ value, size = 160 }: { value: string; size?: number }) {
@@ -22,7 +21,7 @@ function QRCode({ value, size = 160 }: { value: string; size?: number }) {
 
 const PHASE = { GUESS: "guess", COUNTER: "counter", REVEAL: "reveal" };
 
-export default function WavelengthGame({ gameData, roomId, isHost }: WavelengthProps) {
+export default function WavelengthGame({ gameData, roomId}: WavelengthProps) {
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [target, setTarget] = useState(0);
   const [guess, setGuess] = useState(0);
@@ -242,14 +241,6 @@ export default function WavelengthGame({ gameData, roomId, isHost }: WavelengthP
               </div>
             </div>
 
-            {isHost && (
-              <button 
-                onClick={nextRound} 
-                className="w-full py-5 bg-white text-[#0d0d1a] rounded-2xl font-black text-xl hover:bg-amber-400 transition-all active:scale-95 shadow-xl"
-              >
-                סיבוב הבא
-              </button>
-            )}
           </div>
         )}
       </div>
