@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "./supabaseClient";
 import SpyfallGame from "./SpyfallGame";
 import JustOneGame from "./JustOneGame";
+import WavelengthGame from "./wavelength";
 
 // ─── Utility: Get Room ID from URL ──────────────────────────────────────────
 const getRoomIdFromUrl = () => {
@@ -109,13 +110,22 @@ const isPlayer = window.location.href.includes('role=player');
         />
       );
     
-      case 'just_one':
-        return (
-          <JustOneGame 
-            roomId={roomId} 
-            gameData={gameData} 
-          />
-        );
+    case 'just_one':
+      return (
+        <JustOneGame 
+          roomId={roomId} 
+          gameData={gameData} 
+          isHost={!isPlayer} 
+        />
+      );
+      case 'wavelength':
+      return (
+        <WavelengthGame 
+          roomId={roomId} 
+          gameData={gameData} // הנתונים שנשלפו מהעמודה 'payload'
+          isHost={!isPlayer} 
+        />
+      );
 
     default:
       return (
