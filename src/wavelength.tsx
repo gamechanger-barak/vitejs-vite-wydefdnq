@@ -16,17 +16,17 @@ interface WavelengthGameProps {
 // ── Helper Component: QR Code ──────────────────────────────────────────────
 function QRCode({ value, size = 110 }: { value: string; size?: number }) {
   const encoded = encodeURIComponent(value);
-  const src = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encoded}&bgcolor=ffffff&color=000000&qzone=2`;
+  const src = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encoded}&bgcolor=ffffff&color=000000&qzone=2`; // [cite: 53]
   return (
-    <div className="p-2 bg-white rounded-xl shadow-2xl inline-block">
-      <img src={src} alt="QR Code" width={size} height={size} className="rounded-lg" />
+    <div style={{ padding: '8px', background: 'white', borderRadius: '12px', display: 'inline-block' }}>
+      <img src={src} alt="QR Code" width={size} height={size} style={{ borderRadius: '8px' }} />
     </div>
   );
 }
 
-const PHASE = { GUESS: "guess", COUNTER: "counter", REVEAL: "reveal" };
+const PHASE = { GUESS: "guess", COUNTER: "counter", REVEAL: "reveal" }; // [cite: 54]
 
-export default function WavelengthGame({ gameData, roomId }: WavelengthGameProps) {
+export default function WavelengthGame({ gameData, roomId }: WavelengthGameProps) { // [cite: 52, 55]
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [target, setTarget] = useState(0);
   const [guess, setGuess] = useState(0);
@@ -35,17 +35,16 @@ export default function WavelengthGame({ gameData, roomId }: WavelengthGameProps
   const [scores, setScores] = useState({ a: 0, b: 0 });
   const [roundResult, setRoundResult] = useState({ aPoints: 0, bPoints: 0 });
 
-  const params = new URLSearchParams(window.location.search);
+  const params = new URLSearchParams(window.location.search); // [cite: 58]
   const psychicTarget = params.get("target");
   const psychicCat = params.get("cat");
   const isPsychicView = !!(psychicTarget && psychicCat);
 
-  // חילוץ קלפים גמיש (מערך ישיר או אובייקט)
-  const cards: WavelengthCard[] = Array.isArray(gameData) 
+  const cards: WavelengthCard[] = Array.isArray(gameData) // [cite: 59, 60]
     ? gameData 
     : (gameData?.cards || gameData?.content || []);
 
-  const startRound = (index: number) => {
+  const startRound = (index: number) => { // [cite: 61, 62]
     if (cards.length === 0) return;
     setTarget(Math.floor(Math.random() * 10) + 1);
     setCurrentCardIndex(index);
@@ -60,11 +59,11 @@ export default function WavelengthGame({ gameData, roomId }: WavelengthGameProps
     }
   }, [gameData]);
 
-  const handleConfirmGuess = () => {
+  const handleConfirmGuess = () => { // [cite: 63]
     if (guess > 0) setPhase(PHASE.COUNTER);
   };
 
-  const calculateScores = (bChoice: string) => {
+  const calculateScores = (bChoice: string) => { // [cite: 64-69]
     let aPoints = 0;
     let bPoints = 0;
     const diff = Math.abs(guess - target);
@@ -77,90 +76,77 @@ export default function WavelengthGame({ gameData, roomId }: WavelengthGameProps
     setScores((prev) => ({ a: prev.a + aPoints, b: prev.b + bPoints }));
   };
 
-  const handleCounterGuess = (choice: string) => {
+  const handleCounterGuess = (choice: string) => { // [cite: 70]
     setCounterGuess(choice);
     calculateScores(choice);
     setPhase(PHASE.REVEAL);
   };
 
-  const nextRound = () => {
+  const nextRound = () => { // [cite: 71]
     const nextIndex = (currentCardIndex + 1) % cards.length;
     startRound(nextIndex);
   };
 
-  if (isPsychicView) {
+  if (isPsychicView) { // [cite: 72, 73]
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center" dir="rtl" style={{ background: "radial-gradient(circle, #1e1b4b 0%, #020617 100%)" }}>
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-12 rounded-[3rem] shadow-2xl">
-          <div className="text-amber-400 text-xs font-black uppercase tracking-[0.3em] mb-4 opacity-70">המספר הסודי שלך</div>
-          <h1 className="text-4xl font-black mb-8 text-white">{decodeURIComponent(psychicCat || "")}</h1>
-          <div className="bg-amber-400 text-black w-40 h-40 rounded-full flex items-center justify-center text-8xl font-black shadow-[0_0_50px_rgba(251,191,36,0.5)] mx-auto border-8 border-white/10">
-            {psychicTarget}
-          </div>
-          <p className="mt-10 text-white/40 text-sm italic">זהירות! אל תראה לאף אחד</p>
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(circle, #1e1b4b 0%, #020617 100%)', color: 'white', textAlign: 'center' }} dir="rtl">
+        <h1 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '2rem' }}>{decodeURIComponent(psychicCat || "")}</h1>
+        <div style={{ background: '#fbbf24', color: 'black', width: '160px', height: '160px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '5rem', fontWeight: 900, boxShadow: '0 0 50px rgba(251,191,36,0.5)' }}>
+          {psychicTarget}
         </div>
       </div>
     );
   }
 
-  if (cards.length === 0) {
-    return <div className="min-h-screen bg-[#020617] text-white flex items-center justify-center font-black animate-pulse uppercase tracking-widest">Initialising...</div>;
-  }
+  if (cards.length === 0) return <div style={{ color: 'white', textAlign: 'center', paddingTop: '50px' }}>טוען נתונים...</div>;
 
   const currentCard = cards[currentCardIndex];
   const psychicUrl = `${window.location.origin}${window.location.pathname}?room=${roomId}&target=${target}&cat=${encodeURIComponent(currentCard.subject_category)}`;
 
   return (
-    <div className="min-h-screen text-white font-sans overflow-x-hidden pb-10 px-4" dir="rtl" style={{ background: "radial-gradient(ellipse at center, #1e1b4b 0%, #020617 100%)" }}>
+    <div style={{ minHeight: '100vh', background: 'radial-gradient(ellipse at center, #1e1b4b 0%, #020617 100%)', color: 'white', padding: '20px', fontFamily: 'sans-serif' }} dir="rtl">
       
-      {/* Scoreboard - Fixed at top corners */}
-      <header className="max-w-6xl mx-auto flex items-center justify-between py-8">
-        <div className="flex flex-col items-center bg-cyan-900/20 backdrop-blur-lg border border-cyan-500/30 rounded-3xl px-8 py-5 shadow-[0_0_30px_rgba(6,182,212,0.1)]">
-          <span className="text-[10px] text-cyan-400 font-black tracking-[0.2em] mb-1 uppercase">TEAM A</span>
-          <span className="text-5xl font-black text-white">{scores.a}</span>
+      {/* ניקוד בצדדים וכותרת לבנה */}
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: '1000px', margin: '0 auto 40px' }}>
+        <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(6,182,212,0.3)', borderRadius: '15px', padding: '15px 25px', textAlign: 'center' }}>
+          <div style={{ fontSize: '0.7rem', color: '#22d3ee', fontWeight: 900 }}>TEAM A</div>
+          <div style={{ fontSize: '2.5rem', fontWeight: 900 }}>{scores.a}</div>
         </div>
 
-        <div className="text-center">
-          <h1 className="text-5xl font-black italic tracking-tighter text-white drop-shadow-2xl">סקלות</h1>
-          <div className="bg-amber-400 text-black text-[10px] font-black px-4 py-1 rounded-full mt-3 uppercase tracking-widest inline-block">ROUND {currentCardIndex + 1}</div>
+        <div style={{ textAlign: 'center' }}>
+          <h1 style={{ fontSize: '3.5rem', fontWeight: 900, color: 'white', textShadow: '0 0 20px rgba(255,255,255,0.3)', margin: 0 }}>סקלות</h1>
+          <div style={{ background: '#fbbf24', color: 'black', fontSize: '0.7rem', fontWeight: 900, padding: '2px 10px', borderRadius: '10px', display: 'inline-block', marginTop: '10px' }}>ROUND {currentCardIndex + 1}</div>
         </div>
 
-        <div className="flex flex-col items-center bg-rose-900/20 backdrop-blur-lg border border-rose-500/30 rounded-3xl px-8 py-5 shadow-[0_0_30px_rgba(244,63,94,0.1)]">
-          <span className="text-[10px] text-rose-400 font-black tracking-[0.2em] mb-1 uppercase">TEAM B</span>
-          <span className="text-5xl font-black text-white">{scores.b}</span>
+        <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(244,63,94,0.3)', borderRadius: '15px', padding: '15px 25px', textAlign: 'center' }}>
+          <div style={{ fontSize: '0.7rem', color: '#fb7185', fontWeight: 900 }}>TEAM B</div>
+          <div style={{ fontSize: '2.5rem', fontWeight: 900 }}>{scores.b}</div>
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto space-y-10 mt-6">
-        {/* Category Display */}
-        <div className="text-center space-y-2">
-          <h2 className="text-7xl font-black text-white tracking-tight leading-none drop-shadow-2xl italic">{currentCard.subject_category}</h2>
-        </div>
+      <main style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
+        {/* קטגוריה בולטת */}
+        <h2 style={{ fontSize: '5rem', fontWeight: 900, marginBottom: '50px', letterSpacing: '-0.02em' }}>{currentCard.subject_category}</h2>
 
-        {/* Board Section */}
-        <section className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[4rem] p-12 shadow-2xl relative">
+        {/* לוח הסקאלה עם הקטבים מעליה */}
+        <section style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '40px', padding: '40px', marginBottom: '40px' }}>
           
-          {/* Poles - Positioned ABOVE the scale */}
-          <div className="flex justify-between items-center mb-10">
-            <div className="text-right space-y-2 w-1/3">
-              <span className="text-[10px] font-black text-rose-400 uppercase tracking-widest block mr-2">שמאל (1)</span>
-              <div className="bg-rose-500/20 border border-rose-500/40 text-rose-100 py-4 px-6 rounded-2xl font-black text-xl shadow-inner text-center">
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '30px' }}>
+            <div style={{ width: '45%' }}>
+              <span style={{ fontSize: '0.7rem', fontWeight: 900, color: '#fb7185', display: 'block', marginBottom: '10px' }}>שמאל (1)</span>
+              <div style={{ background: 'rgba(244,63,94,0.1)', border: '1px solid rgba(244,63,94,0.3)', padding: '20px', borderRadius: '20px', fontSize: '1.5rem', fontWeight: 900 }}>
                 {currentCard.left_pole}
               </div>
             </div>
-
-            <div className="w-px h-12 bg-white/10 mx-4 self-end mb-4 opacity-20"></div>
-
-            <div className="text-left space-y-2 w-1/3">
-              <span className="text-[10px] font-black text-cyan-400 uppercase tracking-widest block ml-2 text-left">ימין (10)</span>
-              <div className="bg-cyan-500/20 border border-cyan-500/40 text-cyan-100 py-4 px-6 rounded-2xl font-black text-xl shadow-inner text-center">
+            <div style={{ width: '45%' }}>
+              <span style={{ fontSize: '0.7rem', fontWeight: 900, color: '#22d3ee', display: 'block', marginBottom: '10px' }}>ימין (10)</span>
+              <div style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.3)', padding: '20px', borderRadius: '20px', fontSize: '1.5rem', fontWeight: 900 }}>
                 {currentCard.right_pole}
               </div>
             </div>
           </div>
 
-          {/* Scale Dial */}
-          <div className="flex gap-2.5 h-24">
+          <div style={{ display: 'flex', gap: '8px', height: '80px' }}>
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => {
               const isSelected = guess === n;
               const isTarget = phase === PHASE.REVEAL && target === n;
@@ -169,9 +155,14 @@ export default function WavelengthGame({ gameData, roomId }: WavelengthGameProps
                   key={n}
                   disabled={phase !== PHASE.GUESS}
                   onClick={() => setGuess(n)}
-                  className={`flex-1 rounded-2xl font-black text-3xl transition-all duration-300 border-2 
-                    ${isSelected ? 'bg-cyan-500 border-white text-black scale-110 shadow-[0_0_40px_rgba(6,182,212,0.6)] z-10' : 'bg-white/5 border-transparent text-white/30 hover:bg-white/10'}
-                    ${isTarget ? 'bg-amber-400 border-white !text-black !scale-125 z-20 shadow-[0_0_60px_rgba(251,191,36,0.9)]' : ''}`}
+                  style={{
+                    flex: 1, borderRadius: '15px', border: '2px solid transparent', fontSize: '1.5rem', fontWeight: 900, transition: '0.3s', cursor: phase === PHASE.GUESS ? 'pointer' : 'default',
+                    backgroundColor: isTarget ? '#fbbf24' : isSelected ? '#22d3ee' : 'rgba(255,255,255,0.05)',
+                    color: (isSelected || isTarget) ? 'black' : 'rgba(255,255,255,0.2)',
+                    borderColor: (isSelected || isTarget) ? 'white' : 'transparent',
+                    transform: (isSelected || isTarget) ? 'scale(1.1)' : 'scale(1)',
+                    boxShadow: isTarget ? '0 0 30px #fbbf24' : isSelected ? '0 0 20px #22d3ee' : 'none'
+                  }}
                 >
                   {n}
                 </button>
@@ -180,66 +171,46 @@ export default function WavelengthGame({ gameData, roomId }: WavelengthGameProps
           </div>
         </section>
 
-        {/* Dynamic Controls */}
-        <section className="flex flex-col items-center pt-4">
-          {phase === PHASE.GUESS && (
-            <div className="w-full flex flex-col items-center gap-12 animate-in fade-in slide-in-from-bottom-12">
-              <button onClick={handleConfirmGuess} disabled={guess === 0} className="w-full max-w-sm py-7 bg-white text-black rounded-[2.5rem] font-black text-3xl shadow-2xl active:scale-95 disabled:opacity-5 transition-all hover:bg-cyan-400">
-                אישור ניחוש ✓
-              </button>
-              
-              <div className="bg-white/5 border border-white/10 p-10 rounded-[3.5rem] backdrop-blur-md flex items-center gap-12 shadow-2xl">
-                <div className="text-right">
-                  <div className="text-amber-400 font-black text-sm uppercase mb-2 tracking-widest italic underline decoration-2 underline-offset-4">סריקה סודית</div>
-                  <div className="text-white/40 text-xs leading-relaxed max-w-[160px] font-medium">המכשיר של ה"רוח" - וודאו שאף אחד לא מציץ</div>
-                </div>
-                <QRCode value={psychicUrl} />
+        {/* בקרה ו-QR */}
+        {phase === PHASE.GUESS && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '30px' }}>
+            <button onClick={handleConfirmGuess} disabled={guess === 0} style={{ padding: '20px 60px', fontSize: '1.5rem', fontWeight: 900, borderRadius: '20px', border: 'none', background: guess === 0 ? 'rgba(255,255,255,0.1)' : 'white', color: 'black', cursor: 'pointer' }}>
+              אישור ניחוש ✓
+            </button>
+            <div style={{ background: 'rgba(255,255,255,0.05)', padding: '30px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '20px', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ color: '#fbbf24', fontWeight: 900, fontSize: '0.8rem' }}>סריקה סודית</div>
+                <div style={{ fontSize: '0.6rem', opacity: 0.5, maxWidth: '120px' }}>רק הפסיכולוג סורק כדי לראות את המספר</div>
+              </div>
+              <QRCode value={psychicUrl} />
+            </div>
+          </div>
+        )}
+
+        {phase === PHASE.COUNTER && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px', maxWidth: '600px', margin: '0 auto' }}>
+            <button onClick={() => handleCounterGuess("lower")} style={{ padding: '30px', borderRadius: '25px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', fontWeight: 900, cursor: 'pointer' }}>↓ נמוך</button>
+            <button onClick={() => handleCounterGuess("equal")} style={{ padding: '30px', borderRadius: '25px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', fontWeight: 900, cursor: 'pointer' }}>= בול</button>
+            <button onClick={() => handleCounterGuess("higher")} style={{ padding: '30px', borderRadius: '25px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', fontWeight: 900, cursor: 'pointer' }}>↑ גבוה</button>
+          </div>
+        )}
+
+        {phase === PHASE.REVEAL && (
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '10rem', fontWeight: 900, color: '#fbbf24', lineHeight: 1, marginBottom: '40px', textShadow: '0 0 50px rgba(251,191,36,0.5)' }}>{target}</div>
+            <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', marginBottom: '40px' }}>
+              <div style={{ background: 'rgba(255,255,255,0.05)', padding: '20px 40px', borderRadius: '20px', border: '1px solid rgba(34,211,238,0.3)' }}>
+                <div style={{ fontSize: '0.7rem', color: '#22d3ee' }}>TEAM A ניקוד</div>
+                <div style={{ fontSize: '2rem', fontWeight: 900 }}>+{roundResult.aPoints}</div>
+              </div>
+              <div style={{ background: 'rgba(255,255,255,0.05)', padding: '20px 40px', borderRadius: '20px', border: '1px solid rgba(251,113,133,0.3)' }}>
+                <div style={{ fontSize: '0.7rem', color: '#fb7185' }}>TEAM B {counterGuess}</div> {/*  */}
+                <div style={{ fontSize: '2rem', fontWeight: 900 }}>+{roundResult.bPoints}</div>
               </div>
             </div>
-          )}
-
-          {phase === PHASE.COUNTER && (
-            <div className="w-full text-center animate-in zoom-in fade-in duration-500">
-              <h3 className="text-rose-400 text-sm font-black uppercase tracking-[0.5em] mb-10 italic">קבוצה ב׳: לאיזה צד הנטייה?</h3>
-              <div className="grid grid-cols-3 gap-6 max-w-2xl mx-auto">
-                <button onClick={() => handleCounterGuess("lower")} className="bg-white/5 border border-white/10 py-12 rounded-[3rem] font-black hover:bg-rose-500/20 hover:border-rose-400/40 transition-all group">
-                  <span className="text-5xl block mb-3 group-hover:scale-125 transition-transform">↓</span>
-                  <span className="text-xs opacity-50 uppercase font-black italic">Lower</span>
-                </button>
-                <button onClick={() => handleCounterGuess("equal")} className="bg-white/5 border border-white/10 py-12 rounded-[3rem] font-black hover:bg-white/10 transition-all group">
-                  <span className="text-5xl block mb-3 group-hover:scale-125 transition-transform">=</span>
-                  <span className="text-xs opacity-50 uppercase font-black italic">Equal</span>
-                </button>
-                <button onClick={() => handleCounterGuess("higher")} className="bg-white/5 border border-white/10 py-12 rounded-[3rem] font-black hover:bg-emerald-500/20 hover:border-emerald-400/40 transition-all group">
-                  <span className="text-5xl block mb-3 group-hover:scale-125 transition-transform">↑</span>
-                  <span className="text-xs opacity-50 uppercase font-black italic">Higher</span>
-                </button>
-              </div>
-            </div>
-          )}
-
-          {phase === PHASE.REVEAL && (
-            <div className="w-full text-center animate-in slide-in-from-bottom-24 duration-1000">
-              <div className="text-white/20 text-xs font-black uppercase tracking-[0.8em] mb-6">Reality Revealed</div>
-              <div className="text-[14rem] font-black text-amber-400 leading-none mb-16 drop-shadow-[0_0_80px_rgba(251,191,36,0.6)] italic">{target}</div>
-              
-              <div className="grid grid-cols-2 gap-8 mb-16">
-                <div className="bg-white/5 border border-cyan-500/30 rounded-[2.5rem] p-10 backdrop-blur-xl">
-                  <div className="text-xs text-cyan-400 font-black mb-3 uppercase tracking-widest">TEAM A ניקוד</div>
-                  <div className="text-6xl font-black">+{roundResult.aPoints}</div>
-                </div>
-                <div className="bg-white/5 border border-rose-500/30 rounded-[2.5rem] p-10 backdrop-blur-xl flex flex-col items-center">
-                  <div className="text-xs text-rose-400 font-black mb-3 uppercase tracking-widest">TEAM B {counterGuess}</div>
-                  <div className="text-6xl font-black">+{roundResult.bPoints}</div>
-                </div>
-              </div>
-
-              <button onClick={nextRound} className="w-full max-w-xl py-8 bg-cyan-500 text-black rounded-[2.5rem] font-black text-3xl hover:bg-white transition-all shadow-[0_30px_70px_rgba(6,182,212,0.5)] active:scale-95 uppercase italic tracking-tighter">
-                Next Round →
-              </button>
-            </div>
-          )}
-        </section>
+            <button onClick={nextRound} style={{ padding: '20px 80px', fontSize: '1.5rem', fontWeight: 900, borderRadius: '20px', border: 'none', background: '#22d3ee', color: 'black', cursor: 'pointer' }}>סיבוב הבא →</button>
+          </div>
+        )}
       </main>
     </div>
   );
