@@ -121,7 +121,7 @@ export default function WavelengthGame({ gameData, roomId }: WavelengthGameProps
         </div>
 
         <div className="text-center">
-          <h1 className="text-5xl font-black italic tracking-tighter text-white drop-shadow-2xl">WAVELENGTH</h1>
+          <h1 className="text-5xl font-black italic tracking-tighter text-white drop-shadow-2xl">סקלות</h1>
           <div className="bg-amber-400 text-black text-[10px] font-black px-4 py-1 rounded-full mt-3 uppercase tracking-widest inline-block">ROUND {currentCardIndex + 1}</div>
         </div>
 
