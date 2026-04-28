@@ -117,7 +117,7 @@ const isPlayer = window.location.href.includes('role=player');
             gameData={gameData} 
           />
         );
-    case 'GreenTeamthGame':
+    case 'green_team_wins':
       return (
         <GreenTeamthGame 
           roomId={roomId} 
