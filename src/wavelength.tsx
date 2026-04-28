@@ -16,7 +16,7 @@ interface WavelengthGameProps {
 // ── Helper Component: QR Code ──────────────────────────────────────────────
 function QRCode({ value, size = 110 }: { value: string; size?: number }) {
   const encoded = encodeURIComponent(value);
-  const src = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encoded}&bgcolor=ffffff&color=000000&qzone=2`; // [cite: 53]
+  const src = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encoded}&bgcolor=ffffff&color=000000&qzone=2`;
   return (
     <div style={{ padding: '8px', background: 'white', borderRadius: '12px', display: 'inline-block' }}>
       <img src={src} alt="QR Code" width={size} height={size} style={{ borderRadius: '8px' }} />
@@ -24,9 +24,9 @@ function QRCode({ value, size = 110 }: { value: string; size?: number }) {
   );
 }
 
-const PHASE = { GUESS: "guess", COUNTER: "counter", REVEAL: "reveal" }; // [cite: 54]
+const PHASE = { GUESS: "guess", COUNTER: "counter", REVEAL: "reveal" };
 
-export default function WavelengthGame({ gameData, roomId }: WavelengthGameProps) { // [cite: 52, 55]
+export default function WavelengthGame({ gameData, roomId }: WavelengthGameProps) {
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [target, setTarget] = useState(0);
   const [guess, setGuess] = useState(0);
@@ -35,16 +35,16 @@ export default function WavelengthGame({ gameData, roomId }: WavelengthGameProps
   const [scores, setScores] = useState({ a: 0, b: 0 });
   const [roundResult, setRoundResult] = useState({ aPoints: 0, bPoints: 0 });
 
-  const params = new URLSearchParams(window.location.search); // [cite: 58]
+  const params = new URLSearchParams(window.location.search);
   const psychicTarget = params.get("target");
   const psychicCat = params.get("cat");
   const isPsychicView = !!(psychicTarget && psychicCat);
 
-  const cards: WavelengthCard[] = Array.isArray(gameData) // [cite: 59, 60]
+  const cards: WavelengthCard[] = Array.isArray(gameData) 
     ? gameData 
     : (gameData?.cards || gameData?.content || []);
 
-  const startRound = (index: number) => { // [cite: 61, 62]
+  const startRound = (index: number) => {
     if (cards.length === 0) return;
     setTarget(Math.floor(Math.random() * 10) + 1);
     setCurrentCardIndex(index);
@@ -59,11 +59,11 @@ export default function WavelengthGame({ gameData, roomId }: WavelengthGameProps
     }
   }, [gameData]);
 
-  const handleConfirmGuess = () => { // [cite: 63]
+  const handleConfirmGuess = () => {
     if (guess > 0) setPhase(PHASE.COUNTER);
   };
 
-  const calculateScores = (bChoice: string) => { // [cite: 64-69]
+  const calculateScores = (bChoice: string) => {
     let aPoints = 0;
     let bPoints = 0;
     const diff = Math.abs(guess - target);
@@ -76,18 +76,18 @@ export default function WavelengthGame({ gameData, roomId }: WavelengthGameProps
     setScores((prev) => ({ a: prev.a + aPoints, b: prev.b + bPoints }));
   };
 
-  const handleCounterGuess = (choice: string) => { // [cite: 70]
+  const handleCounterGuess = (choice: string) => {
     setCounterGuess(choice);
     calculateScores(choice);
     setPhase(PHASE.REVEAL);
   };
 
-  const nextRound = () => { // [cite: 71]
+  const nextRound = () => {
     const nextIndex = (currentCardIndex + 1) % cards.length;
     startRound(nextIndex);
   };
 
-  if (isPsychicView) { // [cite: 72, 73]
+  if (isPsychicView) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(circle, #1e1b4b 0%, #020617 100%)', color: 'white', textAlign: 'center' }} dir="rtl">
         <h1 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '2rem' }}>{decodeURIComponent(psychicCat || "")}</h1>
@@ -106,7 +106,7 @@ export default function WavelengthGame({ gameData, roomId }: WavelengthGameProps
   return (
     <div style={{ minHeight: '100vh', background: 'radial-gradient(ellipse at center, #1e1b4b 0%, #020617 100%)', color: 'white', padding: '20px', fontFamily: 'sans-serif' }} dir="rtl">
       
-      {/* ניקוד בצדדים וכותרת לבנה */}
+      {/* Header */}
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: '1000px', margin: '0 auto 40px' }}>
         <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(6,182,212,0.3)', borderRadius: '15px', padding: '15px 25px', textAlign: 'center' }}>
           <div style={{ fontSize: '0.7rem', color: '#22d3ee', fontWeight: 900 }}>TEAM A</div>
@@ -125,12 +125,9 @@ export default function WavelengthGame({ gameData, roomId }: WavelengthGameProps
       </header>
 
       <main style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
-        {/* קטגוריה בולטת */}
         <h2 style={{ fontSize: '5rem', fontWeight: 900, marginBottom: '50px', letterSpacing: '-0.02em' }}>{currentCard.subject_category}</h2>
 
-        {/* לוח הסקאלה עם הקטבים מעליה */}
         <section style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '40px', padding: '40px', marginBottom: '40px' }}>
-          
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '30px' }}>
             <div style={{ width: '45%' }}>
               <span style={{ fontSize: '0.7rem', fontWeight: 900, color: '#fb7185', display: 'block', marginBottom: '10px' }}>שמאל (1)</span>
@@ -171,7 +168,6 @@ export default function WavelengthGame({ gameData, roomId }: WavelengthGameProps
           </div>
         </section>
 
-        {/* בקרה ו-QR */}
         {phase === PHASE.GUESS && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '30px' }}>
             <button onClick={handleConfirmGuess} disabled={guess === 0} style={{ padding: '20px 60px', fontSize: '1.5rem', fontWeight: 900, borderRadius: '20px', border: 'none', background: guess === 0 ? 'rgba(255,255,255,0.1)' : 'white', color: 'black', cursor: 'pointer' }}>
@@ -180,7 +176,7 @@ export default function WavelengthGame({ gameData, roomId }: WavelengthGameProps
             <div style={{ background: 'rgba(255,255,255,0.05)', padding: '30px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '20px', border: '1px solid rgba(255,255,255,0.1)' }}>
               <div style={{ textAlign: 'right' }}>
                 <div style={{ color: '#fbbf24', fontWeight: 900, fontSize: '0.8rem' }}>סריקה סודית</div>
-                <div style={{ fontSize: '0.6rem', opacity: 0.5, maxWidth: '120px' }}>רק הפסיכולוג סורק כדי לראות את המספר</div>
+                <div style={{ fontSize: '0.6rem', opacity: 0.5, maxWidth: '120px' }}>רק אחד המשתתפים סורק כדי לראות את המספר</div>
               </div>
               <QRCode value={psychicUrl} />
             </div>
@@ -188,10 +184,15 @@ export default function WavelengthGame({ gameData, roomId }: WavelengthGameProps
         )}
 
         {phase === PHASE.COUNTER && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px', maxWidth: '600px', margin: '0 auto' }}>
-            <button onClick={() => handleCounterGuess("lower")} style={{ padding: '30px', borderRadius: '25px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', fontWeight: 900, cursor: 'pointer' }}>↓ נמוך</button>
-            <button onClick={() => handleCounterGuess("equal")} style={{ padding: '30px', borderRadius: '25px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', fontWeight: 900, cursor: 'pointer' }}>= בול</button>
-            <button onClick={() => handleCounterGuess("higher")} style={{ padding: '30px', borderRadius: '25px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', fontWeight: 900, cursor: 'pointer' }}>↑ גבוה</button>
+          <div style={{ textAlign: 'center' }}>
+            <h3 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#fb7185', marginBottom: '30px', textShadow: '0 0 15px rgba(244,63,94,0.3)' }}>
+              קבוצה ב' - מה דעתכם? היכן התשובה הנכונה?
+            </h3>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px', maxWidth: '600px', margin: '0 auto' }}>
+              <button onClick={() => handleCounterGuess("lower")} style={{ padding: '30px', borderRadius: '25px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', fontWeight: 900, cursor: 'pointer' }}>↓ נמוך יותר</button>
+              <button onClick={() => handleCounterGuess("equal")} style={{ padding: '30px', borderRadius: '25px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', fontWeight: 900, cursor: 'pointer' }}>= בול!</button>
+              <button onClick={() => handleCounterGuess("higher")} style={{ padding: '30px', borderRadius: '25px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', fontWeight: 900, cursor: 'pointer' }}>↑ גבוה יותר</button>
+            </div>
           </div>
         )}
 
@@ -204,7 +205,7 @@ export default function WavelengthGame({ gameData, roomId }: WavelengthGameProps
                 <div style={{ fontSize: '2rem', fontWeight: 900 }}>+{roundResult.aPoints}</div>
               </div>
               <div style={{ background: 'rgba(255,255,255,0.05)', padding: '20px 40px', borderRadius: '20px', border: '1px solid rgba(251,113,133,0.3)' }}>
-                <div style={{ fontSize: '0.7rem', color: '#fb7185' }}>TEAM B {counterGuess}</div> {/*  */}
+                <div style={{ fontSize: '0.7rem', color: '#fb7185' }}>TEAM B {counterGuess === "higher" ? "גבוה יותר ↑" : counterGuess === "lower" ? "נמוך יותר ↓" : "בדיוק! ="}</div>
                 <div style={{ fontSize: '2rem', fontWeight: 900 }}>+{roundResult.bPoints}</div>
               </div>
             </div>
