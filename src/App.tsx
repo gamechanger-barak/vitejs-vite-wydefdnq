@@ -3,6 +3,7 @@ import { supabase } from "./supabaseClient";
 import SpyfallGame from "./SpyfallGame";
 import JustOneGame from "./JustOneGame";
 import WavelengthGame from "./wavelength";
+import GreenTeamthGame from "./greenteam";
 
 // ─── Utility: Get Room ID from URL ──────────────────────────────────────────
 const getRoomIdFromUrl = () => {
@@ -109,10 +110,16 @@ const isPlayer = window.location.href.includes('role=player');
           isHost={!isPlayer} 
         />
       );
-    
-    case 'just_one':
+      case 'just_one':
+        return (
+          <JustOneGame 
+            roomId={roomId} 
+            gameData={gameData} 
+          />
+        );
+    case 'GreenTeamthGame':
       return (
-        <JustOneGame 
+        <GreenTeamthGame 
           roomId={roomId} 
           gameData={gameData} 
         />
