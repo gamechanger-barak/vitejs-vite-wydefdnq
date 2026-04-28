@@ -122,6 +122,7 @@ const isPlayer = window.location.href.includes('role=player');
         <GreenTeamthGame 
           roomId={roomId} 
           gameData={gameData} 
+          isHost={!isPlayer}
         />
       );
       case 'wavelength':

@@ -1,15 +1,12 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react'; // הסרתי את useMemo
 import { 
-  Trophy, 
   ChevronLeft, 
-  ChevronRight, 
   RotateCcw,
   Sparkles,
   Users,
   CheckCircle2,
   PartyPopper
-} from 'lucide-react';
-
+} from 'lucide-react'; // הסרתי את Trophy ו-ChevronRight
 // --- Interfaces ---
 
 interface GameContent {
