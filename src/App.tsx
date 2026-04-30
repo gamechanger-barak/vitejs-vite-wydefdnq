@@ -123,6 +123,7 @@ const isPlayer = window.location.href.includes('role=player');
             <SayAnithing 
               roomId={roomId} 
               gameData={gameData} 
+              isHost={true}
             />
           );
         

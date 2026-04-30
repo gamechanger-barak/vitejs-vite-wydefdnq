@@ -3,7 +3,7 @@ npm install lucide-react framer-motion canvas-confetti
 npm install -D @types/canvas-confetti
 */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Trophy, 
@@ -11,7 +11,6 @@ import {
   ChevronRight, 
   Users, 
   MessageSquare, 
-  CheckCircle2, 
   RotateCcw,
   Info
 } from 'lucide-react';
@@ -81,14 +80,22 @@ export default function SayAnything({ gameData, roomId, isHost }: SayAnythingPro
   const [phase, setPhase] = useState<GamePhase>('START');
   const [currentIdx, setCurrentIdx] = useState(0);
 
-  // Bulletproof Data Extraction
   const questions = useMemo(() => {
     if (Array.isArray(gameData)) return gameData;
-    if (gameData?.content && Array.isArray(gameData.content)) return gameData.content;
+    if (gameData && 'content' in gameData && Array.isArray(gameData.content)) return gameData.content;
     return [];
   }, [gameData]);
 
   const currentQuestion = questions[currentIdx];
+
+  const triggerConfetti = () => {
+    confetti({
+      particleCount: 150,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#6366f1', '#8b5cf6', '#d946ef']
+    });
+  };
 
   const nextPhase = () => {
     if (phase === 'START') setPhase('QUESTION');
@@ -107,15 +114,6 @@ export default function SayAnything({ gameData, roomId, isHost }: SayAnythingPro
     }
   };
 
-  const triggerConfetti = () => {
-    confetti({
-      particleCount: 150,
-      spread: 70,
-      origin: { y: 0.6 },
-      colors: ['#6366f1', '#8b5cf6', '#d946ef']
-    });
-  };
-
   if (questions.length === 0) {
     return (
       <div className="fixed inset-0 bg-[#020205] flex items-center justify-center text-white">
@@ -129,11 +127,10 @@ export default function SayAnything({ gameData, roomId, isHost }: SayAnythingPro
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#020205] text-white font-sans overflow-hidden flex flex-col dir-rtl" style={{ direction: 'rtl' }}>
+    <div className="fixed inset-0 z-50 bg-[#020205] text-white font-sans overflow-hidden flex flex-col" style={{ direction: 'rtl' }}>
       <AmbientOrbs />
       <GrainOverlay />
 
-      {/* Header Info */}
       <div className="absolute top-8 left-8 right-8 flex justify-between items-center z-10 opacity-50">
         <div className="flex items-center gap-3">
           <div className="w-3 h-3 rounded-full bg-indigo-500 animate-pulse" />
@@ -144,10 +141,8 @@ export default function SayAnything({ gameData, roomId, isHost }: SayAnythingPro
         </div>
       </div>
 
-      {/* Main Content Area */}
       <div className="flex-1 flex items-center justify-center p-12 z-10">
         <AnimatePresence mode="wait">
-          
           {phase === 'START' && (
             <motion.div 
               key="start"
@@ -253,11 +248,9 @@ export default function SayAnything({ gameData, roomId, isHost }: SayAnythingPro
               </button>
             </motion.div>
           )}
-
         </AnimatePresence>
       </div>
 
-      {/* Control Bar (Host Only) */}
       {isHost && (
         <div className="absolute bottom-12 left-0 right-0 flex justify-center z-20">
           <motion.button
@@ -274,7 +267,6 @@ export default function SayAnything({ gameData, roomId, isHost }: SayAnythingPro
         </div>
       )}
 
-      {/* Instructions Modal (Small overlay) */}
       <div className="absolute bottom-8 right-8 z-10 flex items-center gap-2 text-white/20">
         <Info size={16} />
         <span className="text-xs font-medium uppercase tracking-widest">
