@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import {
   RotateCcw,
@@ -39,50 +38,47 @@ interface GreenTeamWinsProps {
 type GamePhase = 'START' | 'QUESTION' | 'REVEAL' | 'SUMMARY';
 
 /* ──────────────────────────────────────── Ambient Orbs ── */
-/*[cite: 2] */
+
 const AmbientOrbs: React.FC<{ phase: GamePhase }> = ({ phase }) => (
   <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden>
-    <motion.div
-      animate={{
-        scale: [1, 1.1, 1],
-        opacity: [0.15, 0.25, 0.15],
-      }}
-      transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-      className="absolute rounded-full"
+    <div
+      className="absolute rounded-full transition-all duration-[3000ms] ease-in-out"
       style={{
-        width: 800,
-        height: 800,
+        width: 700,
+        height: 700,
         top: '-20%',
         right: '-15%',
-        background: 'radial-gradient(circle, rgba(16,185,129,0.2) 0%, transparent 70%)',
+        background: 'radial-gradient(circle, rgba(16,185,129,0.18) 0%, transparent 70%)',
         filter: 'blur(80px)',
+        animation: 'pulse 8s ease-in-out infinite',
       }}
     />
-    <motion.div
-      animate={{
-        scale: phase === 'REVEAL' ? 1.4 : 1,
-        opacity: phase === 'REVEAL' ? 0.3 : 0.1,
-      }}
-      className="absolute rounded-full transition-all duration-1000"
+    <div
+      className="absolute rounded-full transition-all duration-[2000ms] ease-in-out"
       style={{
-        width: 600,
-        height: 600,
+        width: 500,
+        height: 500,
         bottom: '-10%',
         left: '-10%',
-        background: 'radial-gradient(circle, rgba(6,182,212,0.2) 0%, transparent 70%)',
+        background: phase === 'REVEAL'
+            ? 'radial-gradient(circle, rgba(6,182,212,0.22) 0%, transparent 70%)'
+            : 'radial-gradient(circle, rgba(6,182,212,0.07) 0%, transparent 70%)',
         filter: 'blur(100px)',
+        animation: 'pulse 10s ease-in-out infinite reverse',
       }}
     />
   </div>
 );
 
-/*[cite: 2] */
+/* ─────────────────────────────────── Noise Grain Overlay ── */
+
 const GrainOverlay: React.FC = () => (
   <div
-    className="pointer-events-none fixed inset-0 opacity-[0.03] z-[100]"
+    className="pointer-events-none fixed inset-0 opacity-[0.025]"
     aria-hidden
     style={{
       backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+      backgroundRepeat: 'repeat',
       backgroundSize: '128px 128px',
     }}
   />
@@ -95,32 +91,33 @@ const GreenTeamWins: React.FC<GreenTeamWinsProps> = ({ gameData, roomId, isHost 
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [consensusCount, setConsensusCount] = useState<number>(0);
 
-  /* ── חילוץ נתונים בטוח כדי למנוע את המסך הלבן ── */
+  /* ── חילוץ נתונים בטוח (מניעת מסך לבן) ── */
   const questions = useMemo<GameContent[]>(() => {
-    if (!gameData) return []; /*[cite: 1] */
-    if (Array.isArray(gameData)) return gameData; /*[cite: 2] */
-    if (gameData?.content) return gameData.content; /*[cite: 2] */
-    return []; /*[cite: 1] */
+    if (!gameData) return []; //[cite: 1]
+    if (Array.isArray(gameData)) return gameData; //[cite: 2]
+    if (gameData?.content) return gameData.content; //[cite: 2]
+    return []; //[cite: 1]
   }, [gameData]);
 
   const metadata = useMemo<GameMetadata>(() => {
-    if (!Array.isArray(gameData) && gameData?.game_metadata) return gameData.game_metadata; /*[cite: 2] */
-    return { company_name: 'TEAM BUILDING', theme: 'Green Team Wins' }; /*[cite: 2] */
+    if (!Array.isArray(gameData) && gameData?.game_metadata) return gameData.game_metadata; //[cite: 2]
+    return { company_name: 'TEAM BUILDING', theme: 'Green Team Wins' }; //[cite: 2]
   }, [gameData]);
 
-  /* ── הגנה המונעת קריסה אם הנתונים עדיין לא קיימים ── */
+  /* ── בדיקת תקינות לפני רינדור ── */
   if (questions.length === 0) {
     return (
-      <div className="min-h-screen bg-[#020205] text-white flex flex-col items-center justify-center font-sans" dir="rtl">
-        <GrainOverlay />
-        <motion.div 
-            animate={{ rotate: 360 }} 
-            transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-            className="w-12 h-12 rounded-full border-2 border-emerald-500/20 border-t-emerald-500 mb-6" 
-        />
-        <p className="text-xs font-black tracking-[0.5em] text-emerald-400 uppercase animate-pulse">
-            Initializing Protocol...
-        </p>
+      <div className="min-h-screen bg-[#020205] text-white flex items-center justify-center" dir="rtl">
+        <div className="flex flex-col items-center gap-6">
+          <div
+            className="w-16 h-16 rounded-full border-2 border-transparent"
+            style={{
+              background: 'linear-gradient(#020205, #020205) padding-box, linear-gradient(135deg, #10b981, #06b6d4) border-box',
+              animation: 'spin 1.2s linear infinite',
+            }}
+          />
+          <p className="text-xs font-black tracking-[0.5em] text-emerald-400 uppercase">טוען מערכת&hellip;</p>
+        </div>
       </div>
     );
   }
@@ -149,177 +146,161 @@ const GreenTeamWins: React.FC<GreenTeamWinsProps> = ({ gameData, roomId, isHost 
   };
 
   /* ════════════════════════ PHASE: START ════════════════════════ */
-  /*[cite: 2] */
   if (phase === 'START') {
     return (
       <div dir="rtl" className="min-h-screen bg-[#020205] text-white flex flex-col items-center justify-center overflow-hidden relative font-sans">
         <AmbientOrbs phase="START" />
         <GrainOverlay />
+        <div
+          className="pointer-events-none absolute inset-0"
+          aria-hidden
+          style={{
+            backgroundImage: 'linear-gradient(rgba(16,185,129,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(16,185,129,0.04) 1px, transparent 1px)',
+            backgroundSize: '60px 60px',
+          }}
+        />
 
-        <motion.div 
-            initial={{ opacity: 0, y: 30 }} 
-            animate={{ opacity: 1, y: 0 }} 
-            className="relative z-10 flex flex-col items-center text-center px-8"
-        >
-          <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full mb-12 bg-emerald-500/10 border border-emerald-500/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
+        <div className="relative z-10 flex flex-col items-center text-center px-8 max-w-5xl mx-auto">
+          <div
+            className="inline-flex items-center gap-3 px-5 py-2 rounded-full mb-14"
+            style={{ background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.18)' }}
+          >
             <Target className="w-3.5 h-3.5 text-emerald-400" />
             <span className="text-[10px] font-black tracking-[0.45em] text-emerald-400 uppercase">Consensus Protocol v2.0</span>
           </div>
 
-          <h1 className="font-black tracking-tighter leading-[0.85] mb-10 text-[clamp(80px,14vw,160px)]">
-            GREEN <span className="text-transparent bg-clip-text bg-gradient-to-b from-emerald-300 to-emerald-600">TEAM</span><br />WINS
+          <h1 className="font-black tracking-tighter leading-[0.88] mb-10 select-none text-[clamp(80px,14vw,160px)]">
+            GREEN <span style={{ backgroundImage: 'linear-gradient(135deg, #6ee7b7 0%, #10b981 40%, #059669 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>TEAM</span><br />WINS
           </h1>
 
           <p className="text-xl text-gray-400 font-light leading-relaxed max-w-xl mb-16">
             המשחק שבו האינדיבידואל מנצח דרך <span className="text-white font-semibold">הקבוצה</span>.<br />
-            תהיו ברוב – תהיו בירוק.
+            תהיו ברוב – תהיו בירוק.[cite: 2]
           </p>
 
           <button
             onClick={() => setPhase('QUESTION')}
-            className="px-16 py-6 rounded-2xl bg-emerald-600 text-black font-black text-2xl shadow-[0_0_50px_rgba(16,185,129,0.35)] hover:bg-emerald-400 transition-all active:scale-95 cursor-pointer"
+            className="group relative overflow-hidden px-14 py-5 rounded-2xl font-black text-xl tracking-tight transition-all duration-300 active:scale-95"
+            style={{ background: 'linear-gradient(135deg, #10b981, #059669)', color: '#020205', boxShadow: '0 0 60px rgba(16,185,129,0.35), 0 20px 40px rgba(0,0,0,0.5)' }}
           >
-            כניסה למערכת
+            <span className="relative z-10 flex items-center gap-3">כניסה למערכת <Zap className="w-5 h-5 fill-current" /></span>
           </button>
-        </motion.div>
+          <p className="mt-10 text-[10px] font-mono tracking-[0.35em] text-white/15 uppercase">Room {roomId}</p>
+        </div>
       </div>
     );
   }
 
   /* ════════════════════════ PHASE: SUMMARY ════════════════════════ */
-  /*[cite: 2] */
   if (phase === 'SUMMARY') {
     return (
       <div dir="rtl" className="min-h-screen bg-[#020205] text-white flex flex-col items-center justify-center p-10 relative overflow-hidden font-sans">
         <AmbientOrbs phase="SUMMARY" />
         <GrainOverlay />
-
-        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="relative z-10 w-full max-w-4xl flex flex-col items-center">
-          <PartyPopper className="w-20 h-20 text-amber-400 mb-8 animate-bounce" />
-          <h2 className="text-7xl font-black tracking-tighter mb-16 text-center">משימה הושלמה</h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full mb-16">
-            <div className="rounded-[3rem] p-12 flex flex-col items-center gap-4 bg-white/[0.02] border border-white/10 backdrop-blur-2xl shadow-2xl">
+        <div className="relative z-10 w-full max-w-4xl flex flex-col items-center text-center">
+          <PartyPopper className="w-14 h-14 text-amber-400 mb-12" style={{ animation: 'bounce 1s infinite' }} />
+          <h2 className="font-black tracking-tighter mb-16 text-[clamp(48px,8vw,80px)]">משימה הושלמה</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mb-16 text-center">
+            <div className="rounded-[2rem] p-10 flex flex-col items-center gap-4" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', backdropFilter: 'blur(24px)' }}>
               <p className="text-[10px] font-black uppercase tracking-[0.45em] text-emerald-500/60">מדד סנכרון סופי</p>
               <div className="flex items-center gap-5">
-                <Zap className="w-12 h-12 text-emerald-400 fill-emerald-400" />
-                <span className="text-9xl font-mono font-black text-transparent bg-clip-text bg-gradient-to-b from-emerald-300 to-emerald-600">{consensusCount}</span>
+                <Zap className="w-10 h-10 text-emerald-400 fill-emerald-400" />
+                <span className="font-mono font-black text-[96px]" style={{ backgroundImage: 'linear-gradient(135deg, #6ee7b7, #10b981)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', lineHeight: 1 }}>{consensusCount}</span>
               </div>
             </div>
-
-            <div className="rounded-[3rem] p-12 flex flex-col items-center text-center gap-6 bg-white/[0.02] border border-white/10 backdrop-blur-2xl">
-              <Crown className="w-12 h-12 text-amber-500" />
-              <h3 className="text-2xl font-black">הירוקים שביניכם</h3>
-              <p className="text-gray-500 text-lg italic">מאסטר הקונצנזוס של {metadata.company_name}.</p>
+            <div className="rounded-[2rem] p-10 flex flex-col items-center text-center gap-4" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', backdropFilter: 'blur(24px)' }}>
+              <Crown className="w-10 h-10 text-amber-400" />
+              <h3 className="text-xl font-black tracking-tight">הירוקים שביניכם</h3>
+              <p className="text-gray-500 text-sm">מי שצבר הכי הרבה נקודות הוא מאסטר הקונצנזוס של <span className="text-white font-semibold">{metadata.company_name}</span>.[cite: 2]</p>
             </div>
           </div>
 
-          <button onClick={() => window.location.reload()} className="flex items-center gap-3 text-white/20 hover:text-white transition-colors cursor-pointer">
-            <RotateCcw className="w-4 h-4" />
-            <span className="text-xs font-mono uppercase tracking-[0.3em]">אתחול מחדש &bull; Room: {roomId}</span>
+          <button onClick={() => window.location.reload()} className="group flex items-center gap-3 text-white/20 hover:text-white/60 transition-colors tracking-[0.3em] uppercase text-[10px] font-mono">
+            <RotateCcw className="w-4 h-4" /> אתחול מחדש &bull; Room: {roomId}
           </button>
-        </motion.div>
+        </div>
       </div>
     );
   }
 
   /* ════════════════════════ PHASE: QUESTION / REVEAL ════════════════════════ */
-  /*[cite: 2] */
   return (
     <div dir="rtl" className="min-h-screen bg-[#020205] text-white flex flex-col relative overflow-hidden font-sans">
       <AmbientOrbs phase={phase} />
       <GrainOverlay />
+      {phase === 'REVEAL' && <div className="fixed top-0 left-0 right-0 h-px z-50" style={{ background: 'linear-gradient(90deg, transparent, #10b981 30%, #06b6d4 70%, transparent)', boxShadow: '0 0 20px rgba(16,185,129,0.8)', animation: 'pulse 2s ease-in-out infinite' }} />}
 
-      <header className="relative z-20 flex justify-between items-start px-8 pt-12 md:px-16">
-        <div className="space-y-2">
+      <header className="relative z-20 flex justify-between items-start px-8 pt-12 md:px-14">
+        <div className="space-y-1.5">
           <div className="flex items-center gap-2">
-            <LayoutDashboard className="w-4 h-4 text-emerald-500" />
+            <LayoutDashboard className="w-3.5 h-3.5 text-emerald-500" />
             <span className="text-[10px] font-black tracking-[0.4em] text-emerald-500 uppercase">{metadata.company_name}</span>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white/80 italic tracking-tighter uppercase">{metadata.theme}</h1>
+          <h1 className="text-lg font-bold tracking-tight text-white/80">{metadata.theme}</h1>
         </div>
 
         {isHost && (
-          <div className="bg-black/60 border border-white/10 px-8 py-4 rounded-[2rem] flex items-center gap-10 backdrop-blur-3xl shadow-2xl">
-            <div className="text-center">
-              <p className="text-[9px] font-black tracking-[0.45em] text-white/25 uppercase mb-1">מדד סנכרון</p>
-              <div className="flex items-center gap-6">
-                <span className="text-5xl font-mono font-black text-transparent bg-clip-text bg-gradient-to-b from-emerald-100 to-emerald-500">
-                    {String(consensusCount).padStart(2, '0')}
-                </span>
-                <button onClick={() => setConsensusCount(p => p + 1)} className="w-12 h-12 rounded-2xl bg-emerald-500 text-black flex items-center justify-center hover:bg-emerald-400 transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] active:scale-90 cursor-pointer">
-                  <Plus className="w-6 h-6" />
-                </button>
-              </div>
+          <div className="flex items-center gap-6 px-7 py-4 rounded-2xl" style={{ background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(24px)', boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.06)' }}>
+            <div className="flex flex-col items-start gap-0.5">
+              <p className="text-[9px] font-black tracking-[0.45em] text-white/25 uppercase">מדד סנכרון</p>
+              <span className="font-mono font-black text-[40px]" style={{ backgroundImage: 'linear-gradient(135deg, #d1fae5, #10b981)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', lineHeight: 1 }}>{String(consensusCount).padStart(2, '0')}</span>
             </div>
+            <button onClick={() => setConsensusCount((p) => p + 1)} className="w-11 h-11 rounded-xl flex items-center justify-center bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-lg active:scale-90 transition-transform"><Plus className="w-5 h-5 text-black" /></button>
           </div>
         )}
       </header>
 
-      <main className="relative z-20 flex-1 flex flex-col justify-center px-6 md:px-16 py-10 max-w-6xl mx-auto w-full">
-        <div className="mb-14 space-y-4">
-          <div className="flex justify-between items-end px-2">
-            <span className="font-mono font-black text-white/10 text-6xl tracking-tighter select-none leading-none">
-              {String(currentIndex + 1).padStart(2, '0')}
-            </span>
-            <span className="text-[10px] font-black uppercase tracking-[0.35em] text-white/25">STEP {currentIndex + 1} / {totalQuestions}</span>
+      <main className="relative z-20 flex-1 flex flex-col justify-center px-6 md:px-14 py-10 max-w-5xl mx-auto w-full">
+        <div className="mb-10 space-y-3">
+          <div className="flex justify-between items-end text-center">
+            <span className="font-mono font-black text-white/10 text-[48px] tracking-tighter select-none leading-none">{String(currentIndex + 1).padStart(2, '0')}</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.35em] text-white/25">{currentIndex + 1} / {totalQuestions}</span>
           </div>
-          <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
-            <motion.div 
-                initial={{ width: 0 }} 
-                animate={{ width: `${progress}%` }} 
-                transition={{ duration: 0.8 }}
-                className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 shadow-[0_0_15px_rgba(16,185,129,0.5)]" 
-            />
-          </div>
+          <div className="w-full h-px rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }}><div className="h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${progress}%`, background: 'linear-gradient(90deg, #10b981, #06b6d4)', boxShadow: '0 0 12px rgba(16,185,129,0.7)' }} /></div>
         </div>
 
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentIndex}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="relative rounded-[4rem] p-16 md:p-28 min-h-[500px] flex flex-col justify-center items-center text-center bg-white/[0.02] backdrop-blur-[40px] border border-white/10 shadow-2xl"
-          >
-            <div className="absolute top-14 flex items-center gap-4">
-              <div className="h-px w-10 bg-emerald-500/30" />
-              <span className="text-xs font-black uppercase tracking-[0.5em] text-emerald-400">{currentCard.category}</span>
-              <div className="h-px w-10 bg-emerald-500/30" />
+        <div
+          className="relative rounded-[2.5rem] p-12 md:p-20 min-h-[420px] flex flex-col justify-center items-center text-center overflow-hidden transition-all duration-350"
+          style={{ background: 'rgba(255,255,255,0.02)', backdropFilter: 'blur(32px)', border: phase === 'REVEAL' ? '1px solid rgba(16,185,129,0.35)' : '1px solid rgba(255,255,255,0.06)', boxShadow: phase === 'REVEAL' ? '0 0 80px rgba(16,185,129,0.12)' : '0 30px 80px rgba(0,0,0,0.4)' }}
+        >
+          <div className="absolute top-10 flex items-center gap-3">
+            <div className="h-px w-8 bg-emerald-500/40" />
+            <span className="text-[10px] font-black uppercase tracking-[0.5em] text-emerald-400">{currentCard.category}</span>
+            <div className="h-px w-8 bg-emerald-500/40" />
+          </div>
+
+          <h2 className="font-black tracking-tighter leading-[1.05] text-[clamp(32px,5.5vw,68px)]">{currentCard.prompt}</h2>
+
+          {phase === 'REVEAL' && (
+            <div className="mt-14 flex items-center gap-5 px-8 py-5 rounded-2xl text-black" style={{ background: 'linear-gradient(135deg, #10b981, #059669)', boxShadow: '0 0 60px rgba(16,185,129,0.35)', animation: 'zoomIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275)' }}>
+              <CheckCircle2 className="w-7 h-7" />
+              <div className="text-right">
+                <p className="text-xl font-black leading-tight">הקבוצה הירוקה מנצחת!</p>
+                <p className="text-xs font-bold opacity-60 uppercase tracking-tighter mt-0.5">מי שברוב מקבל נקודה[cite: 2]</p>
+              </div>
             </div>
-
-            <h2 className="font-black tracking-tighter leading-[1.05] text-[clamp(40px,7vw,90px)] text-white">
-              {currentCard.prompt}
-            </h2>
-
-            {phase === 'REVEAL' && (
-              <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="mt-16 bg-emerald-500 text-black px-12 py-6 rounded-[2rem] flex items-center gap-6 shadow-[0_0_50px_rgba(16,185,129,0.3)]">
-                <CheckCircle2 className="w-8 h-8" />
-                <div className="text-right">
-                  <p className="text-2xl font-black leading-none uppercase tracking-tighter">Green Team Wins!</p>
-                  <p className="text-sm font-bold opacity-60 uppercase tracking-widest mt-1">Point Awarded to Majority</p>
-                </div>
-              </motion.div>
-            )}
-          </motion.div>
-        </AnimatePresence>
+          )}
+        </div>
 
         {isHost && (
-          <div className="mt-16 flex justify-center">
-            <button
-              onClick={nextStep}
-              className="px-16 py-6 rounded-[2.5rem] bg-white text-black font-black text-2xl hover:bg-emerald-400 transition-all shadow-2xl active:scale-95 cursor-pointer flex items-center gap-4"
-            >
+          <div className="mt-12 flex justify-center">
+            <button onClick={nextStep} className="group relative flex items-center gap-5 rounded-[1.75rem] px-12 py-5 font-black text-xl tracking-tight transition-all active:scale-95" style={{ background: phase === 'REVEAL' ? 'rgba(255,255,255,0.05)' : '#ffffff', color: phase === 'REVEAL' ? '#ffffff' : '#020205', border: phase === 'REVEAL' ? '1px solid rgba(16,185,129,0.35)' : 'none' }}>
               <span>{phase === 'QUESTION' ? 'חשוף תוצאה' : 'לשאלה הבאה'}</span>
-              <ArrowLeft className="w-6 h-6" />
+              <ArrowLeft className="w-6 h-6 transition-transform group-hover:translate-x-[-4px]" />
             </button>
           </div>
         )}
       </main>
 
-      <footer className="relative z-20 py-8 opacity-20 text-center">
-        <p className="text-[10px] font-mono uppercase tracking-[0.4em]">Room: {roomId} &bull; ENGINE: GTW_ULTIMATE_V3</p>
-      </footer>
+      <footer className="relative z-20 py-6 text-center opacity-10 text-[9px] font-mono uppercase tracking-[0.4em]">Room: {roomId} &bull; Platform 2.0.4</footer>
+
+      <style>{`
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes zoomIn { from { opacity: 0; transform: scale(0.85) translateY(12px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+      `}</style>
     </div>
   );
 };
