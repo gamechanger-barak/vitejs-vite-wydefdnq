@@ -4,6 +4,7 @@ import SpyfallGame from "./SpyfallGame";
 import JustOneGame from "./JustOneGame";
 import WavelengthGame from "./wavelength";
 import GreenTeamthGame from "./greenteam";
+import SayAnithing from "./say_anything";
 
 // ─── Utility: Get Room ID from URL ──────────────────────────────────────────
 const getRoomIdFromUrl = () => {
@@ -117,6 +118,14 @@ const isPlayer = window.location.href.includes('role=player');
             gameData={gameData} 
           />
         );
+        case 'Say_Anything':
+          return (
+            <SayAnithing 
+              roomId={roomId} 
+              gameData={gameData} 
+            />
+          );
+        
     case 'green_team_wins':
       return (
         <GreenTeamthGame 
