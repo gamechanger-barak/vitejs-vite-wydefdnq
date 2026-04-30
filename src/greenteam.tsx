@@ -390,7 +390,6 @@ const GreenTeamWins: React.FC<GreenTeamWinsProps> = ({ gameData, roomId, isHost 
       dir="rtl"
       className="bg-[#020205] text-white flex flex-col relative overflow-hidden"
       style={{ fontFamily: "'Helvetica Neue', Arial, sans-serif", position: 'fixed', inset: 0 }}
-      style={{ fontFamily: "'Helvetica Neue', Arial, sans-serif" }}
     >
       <AmbientOrbs phase={phase} />
       <GrainOverlay />
