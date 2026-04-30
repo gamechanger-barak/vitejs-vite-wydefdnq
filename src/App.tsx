@@ -118,7 +118,7 @@ const isPlayer = window.location.href.includes('role=player');
             gameData={gameData} 
           />
         );
-        case 'Say_Anything':
+        case 'say_anything':
           return (
             <SayAnithing 
               roomId={roomId} 
