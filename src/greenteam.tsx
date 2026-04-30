@@ -4,7 +4,11 @@ import {
   RotateCcw,
   Users,
   CheckCircle2,
-  PartyPopper
+  PartyPopper,
+  Zap,
+  LayoutDashboard,
+  Target,
+  Crown
 } from 'lucide-react';
 
 // --- Interfaces ---
@@ -35,9 +39,9 @@ type GamePhase = 'START' | 'QUESTION' | 'REVEAL' | 'SUMMARY';
 const GreenTeamWins: React.FC<GreenTeamWinsProps> = ({ gameData, roomId, isHost }) => {
   const [phase, setPhase] = useState<GamePhase>('START');
   const [currentIndex, setCurrentIndex] = useState<number>(0);
-  const [scores, setScores] = useState({ teamA: 0, teamB: 0 });
+  const [consensusCount, setConsensusCount] = useState<number>(0);
 
-  // לוגיקה לחילוץ התוכן - תמיכה במערך ישיר או באובייקט עוטף
+  // חילוץ נתונים חכם
   const questions = useMemo(() => {
     if (Array.isArray(gameData)) return gameData;
     if (gameData && gameData.content) return gameData.content;
@@ -46,15 +50,15 @@ const GreenTeamWins: React.FC<GreenTeamWinsProps> = ({ gameData, roomId, isHost 
 
   const metadata = useMemo(() => {
     if (!Array.isArray(gameData) && gameData?.game_metadata) return gameData.game_metadata;
-    return { company_name: "Green Team Wins", theme: "משחק גיבוש" };
+    return { company_name: "TEAM BUILDING", theme: "Green Team Wins" };
   }, [gameData]);
 
-  // הגנה מפני נתונים חסרים
   if (questions.length === 0) {
     return (
-      <div className="min-h-screen bg-[#0d0d1a] text-white flex items-center justify-center font-sans" dir="rtl">
-        <div className="text-center p-8 border border-white/10 rounded-3xl bg-gray-900/50">
-          <p className="text-xl opacity-50 italic">טוען שאלות...</p>
+      <div className="min-h-screen bg-[#05050a] text-white flex items-center justify-center font-sans" dir="rtl">
+        <div className="animate-pulse flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-emerald-500 font-bold tracking-widest uppercase">Initializing System...</p>
         </div>
       </div>
     );
@@ -77,126 +81,222 @@ const GreenTeamWins: React.FC<GreenTeamWinsProps> = ({ gameData, roomId, isHost 
     }
   };
 
-  const updateScore = (team: 'teamA' | 'teamB', points: number) => {
-    setScores(prev => ({ ...prev, [team]: Math.max(0, prev[team] + points) }));
-  };
+  // --- UI Components ---
+
+  const GlassCard = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
+    <div className={`bg-white/[0.03] border border-white/[0.08] backdrop-blur-xl rounded-[2.5rem] shadow-2xl ${className}`}>
+      {children}
+    </div>
+  );
+
+  const NeonButton = ({ onClick, children, primary = false }: { onClick: () => void, children: React.ReactNode, primary?: boolean }) => (
+    <button 
+      onClick={onClick}
+      className={`
+        px-10 py-4 rounded-2xl font-bold text-xl transition-all duration-300 transform hover:scale-105 active:scale-95
+        ${primary 
+          ? 'bg-emerald-500 text-black shadow-[0_0_30px_rgba(16,185,129,0.4)] hover:bg-emerald-400' 
+          : 'bg-white/5 text-white border border-white/10 hover:bg-white/10'}
+      `}
+    >
+      {children}
+    </button>
+  );
 
   // --- Views ---
 
   if (phase === 'START') {
     return (
-      <div dir="rtl" className="min-h-screen bg-[#0d0d1a] text-white p-12 flex flex-col items-center justify-center font-sans">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-emerald-900/10 rounded-full blur-[120px]" />
-        <div className="text-center space-y-8 relative z-10">
-          <div className="bg-emerald-500/10 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-500/20 shadow-[0_0_30px_rgba(16,185,129,0.2)]">
-            <Users className="w-12 h-12 text-emerald-400" />
+      <div dir="rtl" className="min-h-screen bg-[#05050a] text-white p-12 flex flex-col items-center justify-center font-sans overflow-hidden">
+        {/* Animated Background Orbs */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-600/20 rounded-full blur-[150px] animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-[150px] animate-pulse delay-700" />
+        
+        <div className="text-center relative z-10 space-y-12">
+          <div className="inline-flex items-center gap-3 px-6 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full mb-4">
+            <Target className="w-4 h-4 text-emerald-400" />
+            <span className="text-xs font-black tracking-[0.3em] text-emerald-400 uppercase">Consensus Protocol v2.0</span>
           </div>
-          <h1 className="text-6xl font-black tracking-tighter">GREEN TEAM <span className="text-emerald-500 underline decoration-emerald-500/30">WINS</span></h1>
-          <p className="text-2xl text-gray-400 max-w-xl mx-auto font-light">
-            המטרה פשוטה: לחשוב כמו כולם. <br/>
-            <span className="text-emerald-400 font-bold">הרוב תמיד צודק.</span>
-          </p>
-          <button onClick={() => setPhase('QUESTION')} className="px-12 py-5 bg-emerald-600 hover:bg-emerald-500 rounded-2xl font-bold text-2xl transition-all shadow-lg hover:scale-105 active:scale-95">
-            מתחילים
-          </button>
+          
+          <div className="space-y-4">
+            <h1 className="text-8xl md:text-9xl font-black tracking-tighter leading-none">
+              GREEN <span className="text-transparent bg-clip-text bg-gradient-to-b from-emerald-300 to-emerald-600">TEAM</span>
+              <br />WINS
+            </h1>
+            <p className="text-2xl text-gray-400 max-w-2xl mx-auto font-light leading-relaxed">
+              המשחק שבו האינדיבידואל מנצח דרך <span className="text-white font-semibold">הקבוצה</span>.
+              האם אתם מספיק מסונכרנים כדי להיות ברוב?
+            </p>
+          </div>
+
+          <NeonButton onClick={() => setPhase('QUESTION')} primary>
+            כניסה למערכת
+          </NeonButton>
         </div>
       </div>
     );
   }
 
   if (phase === 'SUMMARY') {
-    const winner = scores.teamA > scores.teamB ? "צוות א'" : scores.teamB > scores.teamA ? "צוות ב'" : "תיקו!";
     return (
-      <div dir="rtl" className="min-h-screen bg-[#0d0d1a] text-white p-12 flex flex-col items-center justify-center font-sans">
-        <PartyPopper className="w-20 h-20 text-amber-400 mb-6" />
-        <h2 className="text-5xl font-bold mb-10">התוצאות הסופיות</h2>
-        <div className="flex gap-8 items-center mb-12">
-          <div className="bg-white/5 border border-white/10 p-8 rounded-3xl text-center min-w-[160px]">
-            <p className="text-gray-500 text-sm mb-2 font-bold uppercase tracking-widest">צוות א'</p>
-            <p className="text-6xl font-mono font-bold text-emerald-400">{scores.teamA}</p>
+      <div dir="rtl" className="min-h-screen bg-[#05050a] text-white p-12 flex flex-col items-center justify-center font-sans">
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10" />
+        
+        <div className="relative z-10 text-center space-y-12 w-full max-w-4xl">
+          <PartyPopper className="w-24 h-24 text-amber-400 mx-auto animate-bounce" />
+          <h2 className="text-6xl font-black">משימה הושלמה</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <GlassCard className="p-10 flex flex-col items-center justify-center space-y-4">
+               <span className="text-emerald-500/50 font-black uppercase tracking-widest text-sm">מדד סנכרון סופי</span>
+               <div className="flex items-center gap-4">
+                 <Zap className="w-12 h-12 text-emerald-400 fill-emerald-400" />
+                 <span className="text-9xl font-mono font-bold">{consensusCount}</span>
+               </div>
+            </GlassCard>
+
+            <GlassCard className="p-10 flex flex-col items-center justify-center space-y-4 text-right">
+               <Crown className="w-12 h-12 text-amber-500" />
+               <h3 className="text-2xl font-bold">הירוקים שביניכם:</h3>
+               <p className="text-gray-400 leading-relaxed">
+                 מי שצבר הכי הרבה נקודות לאורך המשחק הוא "מאסטר הקונצנזוס" של {metadata.company_name}.
+               </p>
+            </GlassCard>
           </div>
-          <div className="text-2xl font-black text-gray-800">VS</div>
-          <div className="bg-white/5 border border-white/10 p-8 rounded-3xl text-center min-w-[160px]">
-            <p className="text-gray-500 text-sm mb-2 font-bold uppercase tracking-widest">צוות ב'</p>
-            <p className="text-6xl font-mono font-bold text-rose-400">{scores.teamB}</p>
-          </div>
+
+          <button onClick={() => window.location.reload()} className="flex items-center gap-3 text-gray-500 hover:text-white transition-all mx-auto pt-8 group">
+            <RotateCcw className="w-6 h-6 group-hover:rotate-180 transition-transform duration-500" />
+            <span className="text-xl font-medium tracking-tight">אתחול משחק חדש</span>
+          </button>
         </div>
-        <div className="px-10 py-5 bg-emerald-500/20 border border-emerald-500/30 rounded-2xl mb-8 shadow-[0_0_40px_rgba(16,185,129,0.1)]">
-            <h3 className="text-3xl font-bold text-emerald-400">המנצח: {winner}</h3>
-        </div>
-        <button onClick={() => window.location.reload()} className="flex items-center gap-2 text-gray-500 hover:text-white transition-all"><RotateCcw className="w-5 h-5" /> משחק חדש</button>
       </div>
     );
   }
 
   return (
-    <div dir="rtl" className="min-h-screen bg-[#0d0d1a] text-white p-6 md:p-12 font-sans relative flex flex-col overflow-hidden">
-      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-emerald-900/10 rounded-full blur-[120px]" />
-      
-      <header className="relative z-10 flex justify-between items-center mb-12">
-        <div>
-          <h4 className="text-emerald-500 font-bold text-sm tracking-widest uppercase">{metadata.company_name}</h4>
-          <h1 className="text-xl font-medium opacity-60 italic">{metadata.theme}</h1>
-        </div>
+    <div dir="rtl" className="min-h-screen bg-[#05050a] text-white p-8 md:p-16 font-sans relative flex flex-col overflow-hidden">
+      {/* Background Glows */}
+      <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-600/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
 
-        <div className="bg-gray-900/80 border border-white/10 p-4 rounded-2xl flex items-center gap-6 backdrop-blur-md shadow-2xl">
-            <div className="flex items-center gap-3">
-                {isHost && <button onClick={() => updateScore('teamA', -1)} className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center">-</button>}
-                <div className="text-center">
-                  <p className="text-[10px] text-gray-500 font-bold mb-1">TEAM A</p>
-                  <span className="text-2xl font-mono text-emerald-400">{scores.teamA}</span>
-                </div>
-                {isHost && <button onClick={() => updateScore('teamA', 1)} className="w-8 h-8 rounded-full bg-emerald-500/20 hover:bg-emerald-500/40 transition-colors text-emerald-400 flex items-center justify-center">+</button>}
-            </div>
-            <div className="w-px h-10 bg-gray-800" />
-            <div className="flex items-center gap-3">
-                {isHost && <button onClick={() => updateScore('teamB', -1)} className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center">-</button>}
-                <div className="text-center">
-                  <p className="text-[10px] text-gray-500 font-bold mb-1">TEAM B</p>
-                  <span className="text-2xl font-mono text-rose-400">{scores.teamB}</span>
-                </div>
-                {isHost && <button onClick={() => updateScore('teamB', 1)} className="w-8 h-8 rounded-full bg-rose-500/20 hover:bg-rose-500/40 transition-colors text-rose-400 flex items-center justify-center">+</button>}
-            </div>
-        </div>
-      </header>
-
-      <main className="relative z-10 flex-1 flex flex-col justify-center max-w-4xl mx-auto w-full">
-        <div className="w-full h-1.5 bg-gray-800 rounded-full mb-8 overflow-hidden">
-          <div className="h-full bg-emerald-500 transition-all duration-700 shadow-[0_0_15px_#10b981]" style={{ width: `${progress}%` }} />
-        </div>
-
-        <div className="bg-gray-900/40 border border-white/5 backdrop-blur-xl p-12 md:p-20 rounded-[3rem] shadow-2xl relative min-h-[420px] flex flex-col justify-center overflow-hidden">
-            <div className="absolute top-8 right-12 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
-               <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">{currentCard.category}</span>
-            </div>
-            
-            <h2 className="text-4xl md:text-6xl font-bold text-center leading-tight">
-                {currentCard.prompt}
-            </h2>
-
-            {phase === 'REVEAL' && (
-                <div className="mt-12 flex flex-col items-center animate-in zoom-in duration-300">
-                    <div className="bg-emerald-500/10 border border-emerald-500/20 px-8 py-4 rounded-2xl flex items-center gap-4 shadow-[0_0_20px_rgba(16,185,129,0.1)]">
-                        <CheckCircle2 className="text-emerald-500 w-8 h-8" />
-                        <span className="text-xl font-bold text-emerald-50">מי שבקבוצה הירוקה - מקבל נקודה!</span>
-                    </div>
-                </div>
-            )}
+      {/* Header Area */}
+      <header className="relative z-20 flex justify-between items-center mb-16">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <LayoutDashboard className="w-4 h-4 text-emerald-500" />
+            <span className="text-xs font-black text-emerald-500 uppercase tracking-[0.2em]">{metadata.company_name}</span>
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight">{metadata.theme}</h1>
         </div>
 
         {isHost && (
-          <div className="mt-8 flex justify-between items-center px-4">
-             <span className="text-gray-600 font-mono text-sm tracking-tighter">שאלה {currentIndex + 1} מתוך {totalQuestions}</span>
-             <button onClick={nextStep} className="px-10 py-4 bg-white text-black font-bold rounded-2xl hover:bg-emerald-400 transition-all flex items-center gap-2 shadow-xl hover:scale-105 active:scale-95">
-               {phase === 'QUESTION' ? 'חשוף תוצאה' : 'לשאלה הבאה'}
-               <ChevronLeft className="w-5 h-5" />
-             </button>
+          <div className="group relative">
+            <div className="absolute -inset-1 bg-gradient-to-r from-emerald-600 to-cyan-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
+            <div className="relative bg-black border border-white/10 px-8 py-4 rounded-2xl flex items-center gap-8 shadow-2xl">
+              <div className="text-center">
+                <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">מדד סנכרון</p>
+                <div className="flex items-center gap-4">
+                  <span className="text-4xl font-mono font-bold text-white">{consensusCount}</span>
+                  <button 
+                    onClick={() => setConsensusCount(prev => prev + 1)}
+                    className="w-10 h-10 rounded-xl bg-emerald-500 text-black hover:bg-emerald-400 transition-all flex items-center justify-center shadow-[0_0_15px_rgba(16,185,129,0.3)]"
+                  >
+                    <Zap className="w-5 h-5 fill-current" />
+                  </button>
+                </div>
+              </div>
+              <div className="w-px h-12 bg-white/10" />
+              <div className="hidden md:block">
+                <p className="text-[10px] text-emerald-500/50 font-bold max-w-[100px] leading-tight">
+                  המנחה מעלה נקודה אם הושגה הסכמה בחדר
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </header>
+
+      {/* Main Gameplay Area */}
+      <main className="relative z-20 flex-1 flex flex-col justify-center max-w-5xl mx-auto w-full">
+        
+        {/* Modern Progress Track */}
+        <div className="mb-12 space-y-3">
+          <div className="flex justify-between items-end">
+            <span className="text-4xl font-black text-white/20 font-mono tracking-tighter">
+              {String(currentIndex + 1).padStart(2, '0')}
+            </span>
+            <span className="text-xs font-black text-gray-500 uppercase tracking-widest">
+              שלב {currentIndex + 1} מתוך {totalQuestions}
+            </span>
+          </div>
+          <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-gradient-to-r from-emerald-600 to-cyan-500 transition-all duration-1000 ease-out shadow-[0_0_20px_rgba(16,185,129,0.5)]"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+
+        {/* The Giant Question Card */}
+        <div className="relative group">
+          {/* Decorative Corner */}
+          <div className="absolute -top-4 -right-4 w-24 h-24 border-t-2 border-r-2 border-emerald-500/30 rounded-tr-[3rem] pointer-events-none" />
+          
+          <GlassCard className="p-16 md:p-24 min-h-[480px] flex flex-col justify-center items-center text-center relative overflow-hidden group-hover:border-white/20 transition-colors duration-700">
+            {/* Subtle Grid Pattern Overlay */}
+            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20 pointer-events-none" />
+            
+            <div className="absolute top-12 flex items-center gap-3">
+               <div className="h-px w-8 bg-emerald-500/50" />
+               <span className="text-sm font-black text-emerald-400 uppercase tracking-[0.4em]">{currentCard.category}</span>
+               <div className="h-px w-8 bg-emerald-500/50" />
+            </div>
+
+            <h2 className="text-5xl md:text-7xl font-bold leading-[1.1] tracking-tight max-w-4xl">
+              {currentCard.prompt}
+            </h2>
+
+            {phase === 'REVEAL' && (
+              <div className="mt-16 animate-in zoom-in slide-in-from-bottom-8 duration-500">
+                <div className="bg-emerald-500 text-black px-10 py-5 rounded-2xl flex items-center gap-6 shadow-[0_0_50px_rgba(16,185,129,0.3)]">
+                  <div className="bg-black rounded-full p-2">
+                    <CheckCircle2 className="text-emerald-500 w-8 h-8" />
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-black leading-none">הקבוצה הירוקה מנצחת!</p>
+                    <p className="text-sm font-bold opacity-70 italic uppercase tracking-tighter">כל מי שברוב מקבל נקודה</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </GlassCard>
+        </div>
+
+        {/* Navigation - Host Only */}
+        {isHost && (
+          <div className="mt-16 flex justify-center">
+            <button 
+              onClick={nextStep}
+              className="group relative flex items-center gap-6 px-16 py-6 bg-white text-black rounded-[2rem] font-black text-2xl transition-all hover:pr-12 hover:pl-20 shadow-2xl active:scale-95"
+            >
+              <span className="relative z-10">
+                {phase === 'QUESTION' ? 'חשוף תוצאה' : 'לשאלה הבאה'}
+              </span>
+              <ChevronLeft className="w-8 h-8 transition-transform group-hover:-translate-x-2" />
+              <div className="absolute inset-0 bg-emerald-400 rounded-[2rem] scale-x-0 group-hover:scale-x-100 origin-right transition-transform duration-500 -z-0" />
+            </button>
           </div>
         )}
       </main>
 
-      <footer className="mt-8 text-center">
-        <p className="text-[10px] text-gray-700 font-mono uppercase tracking-[0.2em]">Room ID: {roomId} • Platform v2.0</p>
+      {/* Static Info Footer */}
+      <footer className="mt-12 flex justify-between items-center opacity-20">
+        <div className="text-[10px] font-mono uppercase tracking-[0.3em]">Session: {roomId}</div>
+        <div className="flex gap-4">
+          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <div className="w-2 h-2 rounded-full bg-white/20" />
+          <div className="w-2 h-2 rounded-full bg-white/20" />
+        </div>
       </footer>
     </div>
   );
