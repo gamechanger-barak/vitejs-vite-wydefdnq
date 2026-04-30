@@ -13,7 +13,7 @@ import {
   ArrowLeft
 } from 'lucide-react';
 
-/* ─────────────────────────────────────────── Interfaces ──[cite: 2] */
+/* ─────────────────────────────────────────── Interfaces ── */
 
 interface GameContent {
   prompt: string;
@@ -38,8 +38,8 @@ interface GreenTeamWinsProps {
 
 type GamePhase = 'START' | 'QUESTION' | 'REVEAL' | 'SUMMARY';
 
-/* ──────────────────────────────────────── Ambient Orbs ──[cite: 2] */
-
+/* ──────────────────────────────────────── Ambient Orbs ── */
+/*[cite: 2] */
 const AmbientOrbs: React.FC<{ phase: GamePhase }> = ({ phase }) => (
   <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden>
     <motion.div
@@ -76,6 +76,7 @@ const AmbientOrbs: React.FC<{ phase: GamePhase }> = ({ phase }) => (
   </div>
 );
 
+/*[cite: 2] */
 const GrainOverlay: React.FC = () => (
   <div
     className="pointer-events-none fixed inset-0 opacity-[0.03] z-[100]"
@@ -94,20 +95,20 @@ const GreenTeamWins: React.FC<GreenTeamWinsProps> = ({ gameData, roomId, isHost 
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [consensusCount, setConsensusCount] = useState<number>(0);
 
-  /* ── חילוץ נתונים בטוח ──[cite: 1, 2] */
+  /* ── חילוץ נתונים בטוח כדי למנוע את המסך הלבן ── */
   const questions = useMemo<GameContent[]>(() => {
-    if (!gameData) return [];[cite: 1]
-    if (Array.isArray(gameData)) return gameData;[cite: 2]
-    if (gameData?.content) return gameData.content;[cite: 2]
-    return [];[cite: 1]
+    if (!gameData) return []; /*[cite: 1] */
+    if (Array.isArray(gameData)) return gameData; /*[cite: 2] */
+    if (gameData?.content) return gameData.content; /*[cite: 2] */
+    return []; /*[cite: 1] */
   }, [gameData]);
 
   const metadata = useMemo<GameMetadata>(() => {
-    if (!Array.isArray(gameData) && gameData?.game_metadata) return gameData.game_metadata;[cite: 2]
-    return { company_name: 'TEAM BUILDING', theme: 'Green Team Wins' };[cite: 2]
+    if (!Array.isArray(gameData) && gameData?.game_metadata) return gameData.game_metadata; /*[cite: 2] */
+    return { company_name: 'TEAM BUILDING', theme: 'Green Team Wins' }; /*[cite: 2] */
   }, [gameData]);
 
-  /* ── הגנה מפני קריסה אם הנתונים טרם נטענו ──[cite: 1, 2] */
+  /* ── הגנה המונעת קריסה אם הנתונים עדיין לא קיימים ── */
   if (questions.length === 0) {
     return (
       <div className="min-h-screen bg-[#020205] text-white flex flex-col items-center justify-center font-sans" dir="rtl">
@@ -147,7 +148,8 @@ const GreenTeamWins: React.FC<GreenTeamWinsProps> = ({ gameData, roomId, isHost 
     }
   };
 
-  /* ════════════════════════ PHASE: START ════════════════════════[cite: 2] */
+  /* ════════════════════════ PHASE: START ════════════════════════ */
+  /*[cite: 2] */
   if (phase === 'START') {
     return (
       <div dir="rtl" className="min-h-screen bg-[#020205] text-white flex flex-col items-center justify-center overflow-hidden relative font-sans">
@@ -170,7 +172,7 @@ const GreenTeamWins: React.FC<GreenTeamWinsProps> = ({ gameData, roomId, isHost 
 
           <p className="text-xl text-gray-400 font-light leading-relaxed max-w-xl mb-16">
             המשחק שבו האינדיבידואל מנצח דרך <span className="text-white font-semibold">הקבוצה</span>.<br />
-            תהיו ברוב – תהיו בירוק.[cite: 2]
+            תהיו ברוב – תהיו בירוק.
           </p>
 
           <button
@@ -184,7 +186,8 @@ const GreenTeamWins: React.FC<GreenTeamWinsProps> = ({ gameData, roomId, isHost 
     );
   }
 
-  /* ════════════════════════ PHASE: SUMMARY ════════════════════════[cite: 2] */
+  /* ════════════════════════ PHASE: SUMMARY ════════════════════════ */
+  /*[cite: 2] */
   if (phase === 'SUMMARY') {
     return (
       <div dir="rtl" className="min-h-screen bg-[#020205] text-white flex flex-col items-center justify-center p-10 relative overflow-hidden font-sans">
@@ -193,7 +196,7 @@ const GreenTeamWins: React.FC<GreenTeamWinsProps> = ({ gameData, roomId, isHost 
 
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="relative z-10 w-full max-w-4xl flex flex-col items-center">
           <PartyPopper className="w-20 h-20 text-amber-400 mb-8 animate-bounce" />
-          <h2 className="text-7xl font-black tracking-tighter mb-16 text-center">משימה הושלמה[cite: 2]</h2>
+          <h2 className="text-7xl font-black tracking-tighter mb-16 text-center">משימה הושלמה</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full mb-16">
             <div className="rounded-[3rem] p-12 flex flex-col items-center gap-4 bg-white/[0.02] border border-white/10 backdrop-blur-2xl shadow-2xl">
@@ -207,7 +210,7 @@ const GreenTeamWins: React.FC<GreenTeamWinsProps> = ({ gameData, roomId, isHost 
             <div className="rounded-[3rem] p-12 flex flex-col items-center text-center gap-6 bg-white/[0.02] border border-white/10 backdrop-blur-2xl">
               <Crown className="w-12 h-12 text-amber-500" />
               <h3 className="text-2xl font-black">הירוקים שביניכם</h3>
-              <p className="text-gray-500 text-lg italic">מאסטר הקונצנזוס של {metadata.company_name}.[cite: 2]</p>
+              <p className="text-gray-500 text-lg italic">מאסטר הקונצנזוס של {metadata.company_name}.</p>
             </div>
           </div>
 
@@ -220,7 +223,8 @@ const GreenTeamWins: React.FC<GreenTeamWinsProps> = ({ gameData, roomId, isHost 
     );
   }
 
-  /* ════════════════════════ PHASE: QUESTION / REVEAL ════════════════════════[cite: 2] */
+  /* ════════════════════════ PHASE: QUESTION / REVEAL ════════════════════════ */
+  /*[cite: 2] */
   return (
     <div dir="rtl" className="min-h-screen bg-[#020205] text-white flex flex-col relative overflow-hidden font-sans">
       <AmbientOrbs phase={phase} />
@@ -292,7 +296,7 @@ const GreenTeamWins: React.FC<GreenTeamWinsProps> = ({ gameData, roomId, isHost 
               <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="mt-16 bg-emerald-500 text-black px-12 py-6 rounded-[2rem] flex items-center gap-6 shadow-[0_0_50px_rgba(16,185,129,0.3)]">
                 <CheckCircle2 className="w-8 h-8" />
                 <div className="text-right">
-                  <p className="text-2xl font-black leading-none uppercase tracking-tighter">Green Team Wins![cite: 2]</p>
+                  <p className="text-2xl font-black leading-none uppercase tracking-tighter">Green Team Wins!</p>
                   <p className="text-sm font-bold opacity-60 uppercase tracking-widest mt-1">Point Awarded to Majority</p>
                 </div>
               </motion.div>
