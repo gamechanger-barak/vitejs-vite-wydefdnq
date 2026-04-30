@@ -1,8 +1,7 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import {
-  ChevronLeft,
   RotateCcw,
   CheckCircle2,
   PartyPopper,
@@ -11,9 +10,10 @@ import {
   Target,
   Crown,
   Plus,
+  ArrowLeft
 } from 'lucide-react';
 
-/* ─────────────────────────────────────────── Interfaces ── */
+/* ─────────────────────────────────────────── Interfaces ──[cite: 2] */
 
 interface GameContent {
   prompt: string;
@@ -76,8 +76,6 @@ const AmbientOrbs: React.FC<{ phase: GamePhase }> = ({ phase }) => (
   </div>
 );
 
-/* ─────────────────────────────────── Noise Grain Overlay ──[cite: 2] */
-
 const GrainOverlay: React.FC = () => (
   <div
     className="pointer-events-none fixed inset-0 opacity-[0.03] z-[100]"
@@ -96,20 +94,20 @@ const GreenTeamWins: React.FC<GreenTeamWinsProps> = ({ gameData, roomId, isHost 
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [consensusCount, setConsensusCount] = useState<number>(0);
 
-  /* ── Data extraction (Bulletproof Logic) ──[cite: 1] */
+  /* ── חילוץ נתונים בטוח ──[cite: 1, 2] */
   const questions = useMemo<GameContent[]>(() => {
-    if (!gameData) return [];
-    if (Array.isArray(gameData)) return gameData;
-    if (gameData?.content) return gameData.content;
-    return [];
+    if (!gameData) return [];[cite: 1]
+    if (Array.isArray(gameData)) return gameData;[cite: 2]
+    if (gameData?.content) return gameData.content;[cite: 2]
+    return [];[cite: 1]
   }, [gameData]);
 
   const metadata = useMemo<GameMetadata>(() => {
-    if (!Array.isArray(gameData) && gameData?.game_metadata) return gameData.game_metadata;
-    return { company_name: 'TEAM BUILDING', theme: 'Green Team Wins' };
+    if (!Array.isArray(gameData) && gameData?.game_metadata) return gameData.game_metadata;[cite: 2]
+    return { company_name: 'TEAM BUILDING', theme: 'Green Team Wins' };[cite: 2]
   }, [gameData]);
 
-  /* ── התיקון למסך הלבן: בדיקה לפני הגדרת ה-Card ──[cite: 1] */
+  /* ── הגנה מפני קריסה אם הנתונים טרם נטענו ──[cite: 1, 2] */
   if (questions.length === 0) {
     return (
       <div className="min-h-screen bg-[#020205] text-white flex flex-col items-center justify-center font-sans" dir="rtl">
@@ -117,7 +115,7 @@ const GreenTeamWins: React.FC<GreenTeamWinsProps> = ({ gameData, roomId, isHost 
         <motion.div 
             animate={{ rotate: 360 }} 
             transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-            className="w-12 h-12 rounded-full border-2 border-emerald-500/20 border-t-emerald-500 mb-6 shadow-[0_0_20px_rgba(16,185,129,0.2)]" 
+            className="w-12 h-12 rounded-full border-2 border-emerald-500/20 border-t-emerald-500 mb-6" 
         />
         <p className="text-xs font-black tracking-[0.5em] text-emerald-400 uppercase animate-pulse">
             Initializing Protocol...
@@ -130,7 +128,6 @@ const GreenTeamWins: React.FC<GreenTeamWinsProps> = ({ gameData, roomId, isHost 
   const totalQuestions = questions.length;
   const progress = ((currentIndex + 1) / totalQuestions) * 100;
 
-  /* ── Navigation & Confetti ── */
   const nextStep = () => {
     if (phase === 'QUESTION') {
       setPhase('REVEAL');
@@ -162,7 +159,7 @@ const GreenTeamWins: React.FC<GreenTeamWinsProps> = ({ gameData, roomId, isHost 
             animate={{ opacity: 1, y: 0 }} 
             className="relative z-10 flex flex-col items-center text-center px-8"
         >
-          <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full mb-12 bg-emerald-500/10 border border-emerald-500/20">
+          <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full mb-12 bg-emerald-500/10 border border-emerald-500/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
             <Target className="w-3.5 h-3.5 text-emerald-400" />
             <span className="text-[10px] font-black tracking-[0.45em] text-emerald-400 uppercase">Consensus Protocol v2.0</span>
           </div>
@@ -173,7 +170,7 @@ const GreenTeamWins: React.FC<GreenTeamWinsProps> = ({ gameData, roomId, isHost 
 
           <p className="text-xl text-gray-400 font-light leading-relaxed max-w-xl mb-16">
             המשחק שבו האינדיבידואל מנצח דרך <span className="text-white font-semibold">הקבוצה</span>.<br />
-            תהיו ברוב – תהיו בירוק.
+            תהיו ברוב – תהיו בירוק.[cite: 2]
           </p>
 
           <button
@@ -196,7 +193,7 @@ const GreenTeamWins: React.FC<GreenTeamWinsProps> = ({ gameData, roomId, isHost 
 
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="relative z-10 w-full max-w-4xl flex flex-col items-center">
           <PartyPopper className="w-20 h-20 text-amber-400 mb-8 animate-bounce" />
-          <h2 className="text-7xl font-black tracking-tighter mb-16">משימה הושלמה</h2>
+          <h2 className="text-7xl font-black tracking-tighter mb-16 text-center">משימה הושלמה[cite: 2]</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full mb-16">
             <div className="rounded-[3rem] p-12 flex flex-col items-center gap-4 bg-white/[0.02] border border-white/10 backdrop-blur-2xl shadow-2xl">
@@ -208,9 +205,9 @@ const GreenTeamWins: React.FC<GreenTeamWinsProps> = ({ gameData, roomId, isHost 
             </div>
 
             <div className="rounded-[3rem] p-12 flex flex-col items-center text-center gap-6 bg-white/[0.02] border border-white/10 backdrop-blur-2xl">
-              <Crown className="w-12 h-12 text-amber-400" />
+              <Crown className="w-12 h-12 text-amber-500" />
               <h3 className="text-2xl font-black">הירוקים שביניכם</h3>
-              <p className="text-gray-500 text-lg italic">מאסטר הקונצנזוס של {metadata.company_name}.</p>
+              <p className="text-gray-500 text-lg italic">מאסטר הקונצנזוס של {metadata.company_name}.[cite: 2]</p>
             </div>
           </div>
 
@@ -295,7 +292,7 @@ const GreenTeamWins: React.FC<GreenTeamWinsProps> = ({ gameData, roomId, isHost 
               <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="mt-16 bg-emerald-500 text-black px-12 py-6 rounded-[2rem] flex items-center gap-6 shadow-[0_0_50px_rgba(16,185,129,0.3)]">
                 <CheckCircle2 className="w-8 h-8" />
                 <div className="text-right">
-                  <p className="text-2xl font-black leading-none uppercase tracking-tighter">Green Team Wins!</p>
+                  <p className="text-2xl font-black leading-none uppercase tracking-tighter">Green Team Wins![cite: 2]</p>
                   <p className="text-sm font-bold opacity-60 uppercase tracking-widest mt-1">Point Awarded to Majority</p>
                 </div>
               </motion.div>
@@ -307,9 +304,10 @@ const GreenTeamWins: React.FC<GreenTeamWinsProps> = ({ gameData, roomId, isHost 
           <div className="mt-16 flex justify-center">
             <button
               onClick={nextStep}
-              className="px-16 py-6 rounded-[2.5rem] bg-white text-black font-black text-2xl hover:bg-emerald-400 transition-all shadow-2xl active:scale-95 cursor-pointer"
+              className="px-16 py-6 rounded-[2.5rem] bg-white text-black font-black text-2xl hover:bg-emerald-400 transition-all shadow-2xl active:scale-95 cursor-pointer flex items-center gap-4"
             >
-              {phase === 'QUESTION' ? 'חשוף תוצאה' : 'לשאלה הבאה'}
+              <span>{phase === 'QUESTION' ? 'חשוף תוצאה' : 'לשאלה הבאה'}</span>
+              <ArrowLeft className="w-6 h-6" />
             </button>
           </div>
         )}
