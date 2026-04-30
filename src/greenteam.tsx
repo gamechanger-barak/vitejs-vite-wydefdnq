@@ -36,69 +36,85 @@ interface GreenTeamWinsProps {
 
 type GamePhase = 'START' | 'QUESTION' | 'REVEAL' | 'SUMMARY';
 
+/* ─────────────────────────── Shared wrapper style ── */
+
+const wrapperStyle: React.CSSProperties = {
+  position: 'relative',
+  width: '100%',
+  height: '100dvh',
+  overflow: 'hidden',
+  backgroundColor: '#020205',
+  color: '#ffffff',
+  fontFamily: "'Helvetica Neue', Arial, sans-serif",
+};
+
 /* ──────────────────────────────────────── Ambient Orbs ── */
 
 const AmbientOrbs: React.FC<{ phase: GamePhase }> = ({ phase }) => (
-  <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden>
-    {/* Primary emerald orb – always present */}
+  <>
     <div
-      className="absolute rounded-full transition-all duration-[3000ms] ease-in-out"
       style={{
+        position: 'absolute',
         width: 700,
         height: 700,
         top: '-20%',
         right: '-15%',
-        background:
-          'radial-gradient(circle, rgba(16,185,129,0.18) 0%, transparent 70%)',
+        borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(16,185,129,0.18) 0%, transparent 70%)',
         filter: 'blur(80px)',
-        animation: 'pulse 8s ease-in-out infinite',
+        animation: 'gtw-pulse 8s ease-in-out infinite',
+        pointerEvents: 'none',
+        zIndex: 0,
       }}
     />
-    {/* Secondary cyan orb – glows brighter on REVEAL */}
     <div
-      className="absolute rounded-full transition-all duration-[2000ms] ease-in-out"
       style={{
+        position: 'absolute',
         width: 500,
         height: 500,
         bottom: '-10%',
         left: '-10%',
-        background:
-          phase === 'REVEAL'
-            ? 'radial-gradient(circle, rgba(6,182,212,0.22) 0%, transparent 70%)'
-            : 'radial-gradient(circle, rgba(6,182,212,0.07) 0%, transparent 70%)',
+        borderRadius: '50%',
+        background: phase === 'REVEAL'
+          ? 'radial-gradient(circle, rgba(6,182,212,0.22) 0%, transparent 70%)'
+          : 'radial-gradient(circle, rgba(6,182,212,0.07) 0%, transparent 70%)',
         filter: 'blur(100px)',
-        animation: 'pulse 10s ease-in-out infinite reverse',
+        transition: 'background 2s ease-in-out',
+        animation: 'gtw-pulse 10s ease-in-out infinite reverse',
+        pointerEvents: 'none',
+        zIndex: 0,
       }}
     />
-    {/* Deep indigo accent */}
     <div
-      className="absolute rounded-full"
       style={{
+        position: 'absolute',
         width: 400,
         height: 400,
         top: '40%',
         left: '30%',
-        background:
-          'radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 70%)',
+        borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 70%)',
         filter: 'blur(120px)',
-        animation: 'pulse 12s ease-in-out infinite 2s',
+        animation: 'gtw-pulse 12s ease-in-out infinite 2s',
+        pointerEvents: 'none',
+        zIndex: 0,
       }}
     />
-  </div>
+  </>
 );
 
-/* ─────────────────────────────────── Noise Grain Overlay ── */
+/* ──────────────────────────────────────────── Keyframes ── */
 
-const GrainOverlay: React.FC = () => (
-  <div
-    className="pointer-events-none fixed inset-0 opacity-[0.025]"
-    aria-hidden
-    style={{
-      backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-      backgroundRepeat: 'repeat',
-      backgroundSize: '128px 128px',
-    }}
-  />
+const Keyframes: React.FC = () => (
+  <style>{`
+    @keyframes gtw-pulse { 0%,100%{opacity:1} 50%{opacity:0.55} }
+    @keyframes gtw-bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+    @keyframes gtw-spin { to{transform:rotate(360deg)} }
+    @keyframes gtw-zoomIn {
+      from{opacity:0;transform:scale(0.85) translateY(12px)}
+      to{opacity:1;transform:scale(1) translateY(0)}
+    }
+  `}</style>
 );
 
 /* ──────────────────────────────────────────── Main ── */
@@ -110,7 +126,6 @@ const GreenTeamWins: React.FC<GreenTeamWinsProps> = ({ gameData, roomId, isHost 
   const [cardVisible, setCardVisible] = useState<boolean>(true);
   const prevPhaseRef = useRef<GamePhase>('START');
 
-  /* ── Data extraction ── */
   const questions = useMemo<GameContent[]>(() => {
     if (Array.isArray(gameData)) return gameData;
     if (gameData?.content) return gameData.content;
@@ -122,7 +137,6 @@ const GreenTeamWins: React.FC<GreenTeamWinsProps> = ({ gameData, roomId, isHost 
     return { company_name: 'TEAM BUILDING', theme: 'Green Team Wins' };
   }, [gameData]);
 
-  /* ── Track phase changes for animation triggers ── */
   useEffect(() => {
     prevPhaseRef.current = phase;
   }, [phase]);
@@ -130,18 +144,17 @@ const GreenTeamWins: React.FC<GreenTeamWinsProps> = ({ gameData, roomId, isHost 
   /* ── Empty state ── */
   if (questions.length === 0) {
     return (
-      <div className="bg-[#020205] text-white flex items-center justify-center" dir="rtl" style={{ position: 'fixed', inset: 0 }}>
-        <div className="flex flex-col items-center gap-6">
-          <div
-            className="w-16 h-16 rounded-full border-2 border-transparent"
-            style={{
-              background:
-                'linear-gradient(#020205, #020205) padding-box, linear-gradient(135deg, #10b981, #06b6d4) border-box',
-              animation: 'spin 1.2s linear infinite',
-            }}
-          />
-          <p className="text-xs font-black tracking-[0.5em] text-emerald-400 uppercase">
-            טוען מערכת&hellip;
+      <div dir="rtl" style={{ ...wrapperStyle, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Keyframes />
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24 }}>
+          <div style={{
+            width: 56, height: 56, borderRadius: '50%',
+            border: '2px solid transparent',
+            background: 'linear-gradient(#020205,#020205) padding-box, linear-gradient(135deg,#10b981,#06b6d4) border-box',
+            animation: 'gtw-spin 1.2s linear infinite',
+          }} />
+          <p style={{ fontSize: 11, fontWeight: 900, letterSpacing: '0.45em', color: '#34d399', textTransform: 'uppercase' }}>
+            טוען מערכת…
           </p>
         </div>
       </div>
@@ -152,7 +165,6 @@ const GreenTeamWins: React.FC<GreenTeamWinsProps> = ({ gameData, roomId, isHost 
   const totalQuestions = questions.length;
   const progress = ((currentIndex + 1) / totalQuestions) * 100;
 
-  /* ── Navigation ── */
   const nextStep = () => {
     if (phase === 'QUESTION') {
       setPhase('REVEAL');
@@ -170,98 +182,71 @@ const GreenTeamWins: React.FC<GreenTeamWinsProps> = ({ gameData, roomId, isHost 
     }
   };
 
-  /* ════════════════════════ PHASE: START ════════════════════════ */
+  /* ════════════════════ PHASE: START ════════════════════ */
   if (phase === 'START') {
     return (
-      <div
-        dir="rtl"
-        className="bg-[#020205] text-white flex flex-col items-center justify-center overflow-hidden relative"
-        style={{ fontFamily: "'Helvetica Neue', Arial, sans-serif", position: 'fixed', inset: 0 }}
-      >
+      <div dir="rtl" style={{ ...wrapperStyle, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <Keyframes />
         <AmbientOrbs phase="START" />
-        <GrainOverlay />
 
-        {/* Grid lines decoration */}
-        <div
-          className="pointer-events-none absolute inset-0"
-          aria-hidden
-          style={{
-            backgroundImage:
-              'linear-gradient(rgba(16,185,129,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(16,185,129,0.04) 1px, transparent 1px)',
-            backgroundSize: '60px 60px',
-          }}
-        />
+        {/* Grid */}
+        <div style={{
+          position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0,
+          backgroundImage: 'linear-gradient(rgba(16,185,129,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(16,185,129,0.04) 1px,transparent 1px)',
+          backgroundSize: '60px 60px',
+        }} />
 
-        <div className="relative z-10 flex flex-col items-center text-center px-8 max-w-5xl mx-auto">
-          {/* Protocol badge */}
-          <div
-            className="inline-flex items-center gap-3 px-5 py-2 rounded-full mb-14"
-            style={{
-              background: 'rgba(16,185,129,0.06)',
-              border: '1px solid rgba(16,185,129,0.18)',
-            }}
-          >
-            <Target className="w-3.5 h-3.5 text-emerald-400" />
-            <span className="text-[10px] font-black tracking-[0.45em] text-emerald-400 uppercase">
+        <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '0 32px', maxWidth: 900 }}>
+          {/* Badge */}
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 10, padding: '8px 20px',
+            borderRadius: 999, marginBottom: 56,
+            background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.18)',
+          }}>
+            <Target size={14} style={{ color: '#34d399' }} />
+            <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.45em', color: '#34d399', textTransform: 'uppercase' }}>
               Consensus Protocol v2.0
             </span>
           </div>
 
-          {/* Giant headline */}
-          <h1
-            className="font-black tracking-tighter leading-[0.88] mb-10 select-none"
-            style={{ fontSize: 'clamp(80px, 14vw, 160px)' }}
-          >
+          {/* Headline */}
+          <h1 style={{
+            fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 0.88,
+            fontSize: 'clamp(72px,12vw,148px)', marginBottom: 40, userSelect: 'none',
+          }}>
             GREEN{' '}
-            <span
-              style={{
-                backgroundImage: 'linear-gradient(135deg, #6ee7b7 0%, #10b981 40%, #059669 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-              }}
-            >
-              TEAM
-            </span>
-            <br />
-            WINS
+            <span style={{
+              backgroundImage: 'linear-gradient(135deg,#6ee7b7 0%,#10b981 40%,#059669 100%)',
+              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+            }}>TEAM</span>
+            <br />WINS
           </h1>
 
-          <p
-            className="text-xl text-gray-400 font-light leading-relaxed max-w-xl mb-16"
-            style={{ direction: 'rtl' }}
-          >
-            המשחק שבו האינדיבידואל מנצח דרך{' '}
-            <span className="text-white font-semibold">הקבוצה</span>.
-            <br />
-            תהיו ברוב – תהיו בירוק.
+          <p style={{ fontSize: 20, color: '#9ca3af', fontWeight: 300, lineHeight: 1.6, maxWidth: 480, marginBottom: 60 }}>
+            המשחק שבו האינדיבידואל מנצח דרך <span style={{ color: '#fff', fontWeight: 600 }}>הקבוצה</span>.
+            <br />תהיו ברוב – תהיו בירוק.
           </p>
 
           {/* CTA */}
           <button
             onClick={() => setPhase('QUESTION')}
-            className="group relative overflow-hidden px-14 py-5 rounded-2xl font-black text-xl tracking-tight transition-all duration-300 active:scale-95"
             style={{
-              background: 'linear-gradient(135deg, #10b981, #059669)',
-              color: '#020205',
+              display: 'flex', alignItems: 'center', gap: 12,
+              padding: '20px 56px', borderRadius: 20, border: 'none', cursor: 'pointer',
+              background: 'linear-gradient(135deg,#10b981,#059669)',
+              color: '#020205', fontWeight: 900, fontSize: 20, letterSpacing: '-0.02em',
               boxShadow: '0 0 60px rgba(16,185,129,0.35), 0 20px 40px rgba(0,0,0,0.5)',
+              transition: 'transform 0.15s',
             }}
+            onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.04)')}
+            onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
+            onMouseDown={e => (e.currentTarget.style.transform = 'scale(0.97)')}
           >
-            <span className="relative z-10 flex items-center gap-3">
-              כניסה למערכת
-              <Zap className="w-5 h-5 fill-current" />
-            </span>
-            {/* hover shimmer */}
-            <div
-              className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-              style={{
-                background:
-                  'linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.15) 50%, transparent 70%)',
-              }}
-            />
+            כניסה למערכת
+            <Zap size={20} style={{ fill: '#020205' }} />
           </button>
 
-          {/* Room indicator */}
-          <p className="mt-10 text-[10px] font-mono tracking-[0.35em] text-white/15 uppercase">
+          <p style={{ marginTop: 40, fontSize: 10, fontFamily: 'monospace', letterSpacing: '0.35em', color: 'rgba(255,255,255,0.12)', textTransform: 'uppercase' }}>
             Room {roomId}
           </p>
         </div>
@@ -269,355 +254,279 @@ const GreenTeamWins: React.FC<GreenTeamWinsProps> = ({ gameData, roomId, isHost 
     );
   }
 
-  /* ════════════════════════ PHASE: SUMMARY ════════════════════════ */
+  /* ════════════════════ PHASE: SUMMARY ════════════════════ */
   if (phase === 'SUMMARY') {
     return (
-      <div
-        dir="rtl"
-        className="bg-[#020205] text-white flex flex-col items-center justify-center p-10 relative overflow-hidden"
-        style={{ fontFamily: "'Helvetica Neue', Arial, sans-serif", position: 'fixed', inset: 0 }}
-      >
+      <div dir="rtl" style={{ ...wrapperStyle, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 40, overflowY: 'auto' }}>
+        <Keyframes />
         <AmbientOrbs phase="SUMMARY" />
-        <GrainOverlay />
 
-        <div className="relative z-10 w-full max-w-4xl flex flex-col items-center">
-          {/* Trophy area */}
-          <div className="relative mb-12">
-            <div
-              className="w-28 h-28 rounded-3xl flex items-center justify-center"
-              style={{
-                background:
-                  'linear-gradient(135deg, rgba(251,191,36,0.12) 0%, rgba(245,158,11,0.06) 100%)',
-                border: '1px solid rgba(251,191,36,0.2)',
-                boxShadow: '0 0 60px rgba(251,191,36,0.12)',
-              }}
-            >
-              <PartyPopper className="w-14 h-14 text-amber-400" style={{ animation: 'bounce 1s infinite' }} />
-            </div>
+        <div style={{ position: 'relative', zIndex: 10, width: '100%', maxWidth: 800, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          {/* Trophy */}
+          <div style={{
+            width: 112, height: 112, borderRadius: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'linear-gradient(135deg,rgba(251,191,36,0.12),rgba(245,158,11,0.06))',
+            border: '1px solid rgba(251,191,36,0.2)', boxShadow: '0 0 60px rgba(251,191,36,0.12)',
+            marginBottom: 32,
+          }}>
+            <PartyPopper size={56} style={{ color: '#fbbf24', animation: 'gtw-bounce 1s infinite' }} />
           </div>
 
-          <p className="text-[10px] font-black tracking-[0.6em] text-emerald-400 uppercase mb-4">
+          <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.55em', color: '#34d399', textTransform: 'uppercase', marginBottom: 16 }}>
             Session Complete
           </p>
-          <h2
-            className="font-black tracking-tighter mb-16 text-center"
-            style={{ fontSize: 'clamp(48px, 8vw, 80px)' }}
-          >
+          <h2 style={{ fontWeight: 900, letterSpacing: '-0.04em', fontSize: 'clamp(40px,7vw,72px)', marginBottom: 56, textAlign: 'center' }}>
             משימה הושלמה
           </h2>
 
-          {/* Stats grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mb-16">
-            {/* Consensus score */}
-            <div
-              className="rounded-[2rem] p-10 flex flex-col items-center gap-4"
-              style={{
-                background: 'rgba(255,255,255,0.02)',
-                border: '1px solid rgba(255,255,255,0.07)',
-                boxShadow:
-                  'inset 0 1px 1px rgba(255,255,255,0.07), 0 0 40px rgba(16,185,129,0.06)',
-                backdropFilter: 'blur(24px)',
-              }}
-            >
-              <p className="text-[10px] font-black uppercase tracking-[0.45em] text-emerald-500/60">
+          {/* Stats */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 24, width: '100%', marginBottom: 56 }}>
+            <div style={{
+              borderRadius: 32, padding: '40px 32px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16,
+              background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)',
+              backdropFilter: 'blur(24px)', boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.07)',
+            }}>
+              <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.45em', color: 'rgba(16,185,129,0.5)', textTransform: 'uppercase' }}>
                 מדד סנכרון סופי
               </p>
-              <div className="flex items-center gap-5">
-                <Zap className="w-10 h-10 text-emerald-400 fill-emerald-400" />
-                <span
-                  className="font-mono font-black"
-                  style={{
-                    fontSize: 96,
-                    backgroundImage: 'linear-gradient(135deg, #6ee7b7, #10b981)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    lineHeight: 1,
-                  }}
-                >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+                <Zap size={40} style={{ color: '#34d399', fill: '#34d399' } as React.CSSProperties} />
+                <span style={{
+                  fontSize: 96, fontFamily: 'monospace', fontWeight: 900, lineHeight: 1,
+                  backgroundImage: 'linear-gradient(135deg,#6ee7b7,#10b981)',
+                  WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                }}>
                   {consensusCount}
                 </span>
               </div>
-              <p className="text-xs text-gray-600 font-medium uppercase tracking-widest">
+              <p style={{ fontSize: 11, color: '#4b5563', fontWeight: 500, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
                 נקודות קונצנזוס
               </p>
             </div>
 
-            {/* Champion */}
-            <div
-              className="rounded-[2rem] p-10 flex flex-col items-center text-center gap-4"
-              style={{
-                background: 'rgba(255,255,255,0.02)',
-                border: '1px solid rgba(255,255,255,0.07)',
-                boxShadow:
-                  'inset 0 1px 1px rgba(255,255,255,0.07)',
-                backdropFilter: 'blur(24px)',
-              }}
-            >
-              <Crown className="w-10 h-10 text-amber-400" />
-              <h3 className="text-xl font-black tracking-tight">הירוקים שביניכם</h3>
-              <p className="text-gray-500 text-sm leading-relaxed max-w-xs">
+            <div style={{
+              borderRadius: 32, padding: '40px 32px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 16,
+              background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)',
+              backdropFilter: 'blur(24px)', boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.07)',
+            }}>
+              <Crown size={40} style={{ color: '#f59e0b' }} />
+              <h3 style={{ fontSize: 20, fontWeight: 900, letterSpacing: '-0.02em' }}>הירוקים שביניכם</h3>
+              <p style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.6, maxWidth: 260 }}>
                 מי שצבר הכי הרבה נקודות הוא מאסטר הקונצנזוס של{' '}
-                <span className="text-white font-semibold">{metadata.company_name}</span>.
+                <span style={{ color: '#fff', fontWeight: 600 }}>{metadata.company_name}</span>.
               </p>
             </div>
           </div>
 
-          {/* Reset */}
           <button
             onClick={() => window.location.reload()}
-            className="group flex items-center gap-3 text-white/20 hover:text-white/60 transition-colors duration-300"
+            style={{
+              display: 'flex', alignItems: 'center', gap: 10, background: 'none', border: 'none', cursor: 'pointer',
+              color: 'rgba(255,255,255,0.2)', fontSize: 11, fontFamily: 'monospace',
+              letterSpacing: '0.3em', textTransform: 'uppercase', transition: 'color 0.2s',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.55)')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.2)')}
           >
-            <RotateCcw
-              className="w-4 h-4 transition-transform duration-700"
-              style={{ animation: 'none' }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.transform = 'rotate(360deg)')
-              }
-              onMouseLeave={(e) => (e.currentTarget.style.transform = '')}
-            />
-            <span className="text-xs font-mono uppercase tracking-[0.3em]">
-              אתחול מחדש &bull; Room: {roomId}
-            </span>
+            <RotateCcw size={14} />
+            אתחול מחדש • Room: {roomId}
           </button>
         </div>
       </div>
     );
   }
 
-  /* ════════════════════════ PHASE: QUESTION / REVEAL ════════════════════════ */
+  /* ════════════════════ PHASE: QUESTION / REVEAL ════════════════════ */
   return (
-    <div
-      dir="rtl"
-      className="bg-[#020205] text-white flex flex-col relative overflow-hidden"
-      style={{ fontFamily: "'Helvetica Neue', Arial, sans-serif", position: 'fixed', inset: 0 }}
-    >
+    <div dir="rtl" style={{ ...wrapperStyle, display: 'flex', flexDirection: 'column' }}>
+      <Keyframes />
       <AmbientOrbs phase={phase} />
-      <GrainOverlay />
 
-      {/* Reveal phase – full-width emerald top border flash */}
+      {/* Reveal top border */}
       {phase === 'REVEAL' && (
-        <div
-          className="fixed top-0 left-0 right-0 h-px z-50"
-          style={{
-            background: 'linear-gradient(90deg, transparent, #10b981 30%, #06b6d4 70%, transparent)',
-            boxShadow: '0 0 20px rgba(16,185,129,0.8)',
-            animation: 'pulse 2s ease-in-out infinite',
-          }}
-        />
+        <div style={{
+          position: 'absolute', top: 0, left: 0, right: 0, height: 1, zIndex: 50,
+          background: 'linear-gradient(90deg,transparent,#10b981 30%,#06b6d4 70%,transparent)',
+          boxShadow: '0 0 20px rgba(16,185,129,0.8)',
+          animation: 'gtw-pulse 2s ease-in-out infinite',
+        }} />
       )}
 
       {/* ── HEADER ── */}
-      <header className="relative z-20 flex justify-between items-start px-8 pt-8 pb-0 md:px-14 md:pt-12">
-        {/* Brand */}
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-2">
-            <LayoutDashboard className="w-3.5 h-3.5 text-emerald-500" />
-            <span className="text-[10px] font-black tracking-[0.4em] text-emerald-500 uppercase">
+      <header style={{
+        position: 'relative', zIndex: 20,
+        display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+        padding: '32px 56px 0',
+        flexShrink: 0,
+      }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+            <LayoutDashboard size={14} style={{ color: '#10b981' }} />
+            <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.4em', color: '#10b981', textTransform: 'uppercase' }}>
               {metadata.company_name}
             </span>
           </div>
-          <h1 className="text-lg font-bold tracking-tight text-white/80">{metadata.theme}</h1>
+          <h1 style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.02em', color: 'rgba(255,255,255,0.8)' }}>
+            {metadata.theme}
+          </h1>
         </div>
 
-        {/* Host command center */}
         {isHost && (
-          <div
-            className="flex items-center gap-6 px-7 py-4 rounded-2xl"
-            style={{
-              background: 'rgba(0,0,0,0.6)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              backdropFilter: 'blur(24px)',
-              boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.06), 0 20px 40px rgba(0,0,0,0.4)',
-            }}
-          >
-            <div className="flex flex-col items-start gap-0.5">
-              <p className="text-[9px] font-black tracking-[0.45em] text-white/25 uppercase">
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 24, padding: '16px 28px', borderRadius: 20,
+            background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.08)',
+            backdropFilter: 'blur(24px)', boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.06)',
+          }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.45em', color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase' }}>
                 מדד סנכרון
               </p>
-              <span
-                className="font-mono font-black leading-none"
-                style={{
-                  fontSize: 40,
-                  backgroundImage: 'linear-gradient(135deg, #d1fae5, #10b981)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                }}
-              >
+              <span style={{
+                fontSize: 40, fontFamily: 'monospace', fontWeight: 900, lineHeight: 1,
+                backgroundImage: 'linear-gradient(135deg,#d1fae5,#10b981)',
+                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+              }}>
                 {String(consensusCount).padStart(2, '0')}
               </span>
             </div>
             <button
               onClick={() => setConsensusCount((p) => p + 1)}
-              className="group w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-200 active:scale-90"
               style={{
-                background: 'linear-gradient(135deg, #10b981, #059669)',
+                width: 44, height: 44, borderRadius: 14, border: 'none', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: 'linear-gradient(135deg,#10b981,#059669)',
                 boxShadow: '0 0 20px rgba(16,185,129,0.4)',
+                transition: 'transform 0.15s',
               }}
+              onMouseDown={e => (e.currentTarget.style.transform = 'scale(0.9)')}
+              onMouseUp={e => (e.currentTarget.style.transform = 'scale(1)')}
             >
-              <Plus className="w-5 h-5 text-black" />
+              <Plus size={20} style={{ color: '#020205' }} />
             </button>
           </div>
         )}
       </header>
 
       {/* ── MAIN ── */}
-      <main className="relative z-20 flex-1 flex flex-col justify-center px-6 md:px-14 py-10 max-w-5xl mx-auto w-full">
-        {/* Progress rail */}
-        <div className="mb-10 space-y-3">
-          <div className="flex justify-between items-end">
-            <span
-              className="font-mono font-black text-white/10 tracking-tighter select-none"
-              style={{ fontSize: 48 }}
-            >
+      <main style={{
+        position: 'relative', zIndex: 20, flex: 1,
+        display: 'flex', flexDirection: 'column', justifyContent: 'center',
+        padding: '24px 56px', maxWidth: 960, margin: '0 auto', width: '100%',
+        boxSizing: 'border-box',
+      }}>
+        {/* Progress */}
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 10 }}>
+            <span style={{ fontSize: 48, fontFamily: 'monospace', fontWeight: 900, color: 'rgba(255,255,255,0.08)', letterSpacing: '-0.04em', userSelect: 'none' }}>
               {String(currentIndex + 1).padStart(2, '0')}
             </span>
-            <span className="text-[10px] font-black uppercase tracking-[0.35em] text-white/25">
+            <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.35em', color: 'rgba(255,255,255,0.2)', textTransform: 'uppercase' }}>
               {currentIndex + 1} / {totalQuestions}
             </span>
           </div>
-
-          {/* Progress bar */}
-          <div
-            className="w-full h-px rounded-full overflow-hidden"
-            style={{ background: 'rgba(255,255,255,0.06)' }}
-          >
-            <div
-              className="h-full rounded-full transition-all duration-1000 ease-out"
-              style={{
-                width: `${progress}%`,
-                background: 'linear-gradient(90deg, #10b981, #06b6d4)',
-                boxShadow: '0 0 12px rgba(16,185,129,0.7)',
-              }}
-            />
+          <div style={{ width: '100%', height: 1, borderRadius: 999, background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+            <div style={{
+              height: '100%', borderRadius: 999,
+              width: `${progress}%`,
+              background: 'linear-gradient(90deg,#10b981,#06b6d4)',
+              boxShadow: '0 0 12px rgba(16,185,129,0.7)',
+              transition: 'width 1s ease-out',
+            }} />
           </div>
         </div>
 
-        {/* CARD */}
-        <div
-          className="relative rounded-[2.5rem] p-12 md:p-20 min-h-[420px] flex flex-col justify-center items-center text-center overflow-hidden transition-all duration-350"
-          style={{
-            background: 'rgba(255,255,255,0.02)',
-            backdropFilter: 'blur(32px)',
-            border:
-              phase === 'REVEAL'
-                ? '1px solid rgba(16,185,129,0.35)'
-                : '1px solid rgba(255,255,255,0.06)',
-            boxShadow:
-              phase === 'REVEAL'
-                ? 'inset 0 1px 1px rgba(255,255,255,0.1), 0 0 80px rgba(16,185,129,0.12), 0 30px 80px rgba(0,0,0,0.5)'
-                : 'inset 0 1px 1px rgba(255,255,255,0.07), 0 30px 80px rgba(0,0,0,0.4)',
-            opacity: cardVisible ? 1 : 0,
-            transform: cardVisible ? 'translateY(0) scale(1)' : 'translateY(12px) scale(0.98)',
-          }}
-        >
-          {/* Category label */}
-          <div className="absolute top-10 flex items-center gap-3">
-            <div className="h-px w-8" style={{ background: 'rgba(16,185,129,0.4)' }} />
-            <span className="text-[10px] font-black uppercase tracking-[0.5em] text-emerald-400">
+        {/* Card */}
+        <div style={{
+          position: 'relative', borderRadius: 40, padding: '64px 80px', minHeight: 320,
+          display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
+          textAlign: 'center', overflow: 'hidden',
+          background: 'rgba(255,255,255,0.02)',
+          backdropFilter: 'blur(32px)',
+          border: phase === 'REVEAL' ? '1px solid rgba(16,185,129,0.35)' : '1px solid rgba(255,255,255,0.06)',
+          boxShadow: phase === 'REVEAL'
+            ? 'inset 0 1px 1px rgba(255,255,255,0.1), 0 0 80px rgba(16,185,129,0.12), 0 30px 80px rgba(0,0,0,0.5)'
+            : 'inset 0 1px 1px rgba(255,255,255,0.07), 0 30px 80px rgba(0,0,0,0.4)',
+          opacity: cardVisible ? 1 : 0,
+          transform: cardVisible ? 'translateY(0) scale(1)' : 'translateY(12px) scale(0.98)',
+          transition: 'opacity 0.35s ease, transform 0.35s ease, border 0.6s ease, box-shadow 0.6s ease',
+        }}>
+          {/* Category */}
+          <div style={{ position: 'absolute', top: 32, display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ height: 1, width: 32, background: 'rgba(16,185,129,0.4)' }} />
+            <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.5em', color: '#34d399', textTransform: 'uppercase' }}>
               {currentCard.category}
             </span>
-            <div className="h-px w-8" style={{ background: 'rgba(16,185,129,0.4)' }} />
+            <div style={{ height: 1, width: 32, background: 'rgba(16,185,129,0.4)' }} />
           </div>
 
-          {/* Prompt text */}
-          <h2
-            className="font-black tracking-tighter leading-[1.05] max-w-3xl"
-            style={{ fontSize: 'clamp(32px, 5.5vw, 68px)' }}
-          >
+          {/* Prompt */}
+          <h2 style={{
+            fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1.05,
+            fontSize: 'clamp(28px,4.5vw,60px)', maxWidth: 700,
+          }}>
             {currentCard.prompt}
           </h2>
 
-          {/* REVEAL banner */}
+          {/* Reveal banner */}
           {phase === 'REVEAL' && (
-            <div
-              className="mt-14 flex items-center gap-5 px-8 py-5 rounded-2xl"
-              style={{
-                background: 'linear-gradient(135deg, #10b981, #059669)',
-                color: '#020205',
-                boxShadow: '0 0 60px rgba(16,185,129,0.35)',
-                animation: 'zoomIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275)',
-              }}
-            >
-              <CheckCircle2 className="w-7 h-7 shrink-0" />
-              <div className="text-right">
-                <p className="text-xl font-black leading-tight">הקבוצה הירוקה מנצחת!</p>
-                <p className="text-xs font-bold opacity-60 uppercase tracking-tighter mt-0.5">
+            <div style={{
+              marginTop: 40, display: 'flex', alignItems: 'center', gap: 20,
+              padding: '18px 28px', borderRadius: 18,
+              background: 'linear-gradient(135deg,#10b981,#059669)',
+              color: '#020205', boxShadow: '0 0 60px rgba(16,185,129,0.35)',
+              animation: 'gtw-zoomIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275)',
+            }}>
+              <CheckCircle2 size={26} style={{ flexShrink: 0 }} />
+              <div style={{ textAlign: 'right' }}>
+                <p style={{ fontSize: 18, fontWeight: 900, lineHeight: 1.2 }}>הקבוצה הירוקה מנצחת!</p>
+                <p style={{ fontSize: 11, fontWeight: 700, opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 2 }}>
                   מי שברוב מקבל נקודה
                 </p>
               </div>
             </div>
           )}
 
-          {/* Decorative corner marks */}
-          <div className="absolute top-6 right-8 w-4 h-4 border-t border-r border-white/10 rounded-tr-lg" />
-          <div className="absolute top-6 left-8 w-4 h-4 border-t border-l border-white/10 rounded-tl-lg" />
-          <div className="absolute bottom-6 right-8 w-4 h-4 border-b border-r border-white/10 rounded-br-lg" />
-          <div className="absolute bottom-6 left-8 w-4 h-4 border-b border-l border-white/10 rounded-bl-lg" />
+          {/* Corner marks */}
+          <div style={{ position: 'absolute', top: 20, right: 28, width: 16, height: 16, borderTop: '1px solid rgba(255,255,255,0.1)', borderRight: '1px solid rgba(255,255,255,0.1)' }} />
+          <div style={{ position: 'absolute', top: 20, left: 28, width: 16, height: 16, borderTop: '1px solid rgba(255,255,255,0.1)', borderLeft: '1px solid rgba(255,255,255,0.1)' }} />
+          <div style={{ position: 'absolute', bottom: 20, right: 28, width: 16, height: 16, borderBottom: '1px solid rgba(255,255,255,0.1)', borderRight: '1px solid rgba(255,255,255,0.1)' }} />
+          <div style={{ position: 'absolute', bottom: 20, left: 28, width: 16, height: 16, borderBottom: '1px solid rgba(255,255,255,0.1)', borderLeft: '1px solid rgba(255,255,255,0.1)' }} />
         </div>
 
-        {/* HOST NAV BUTTON */}
+        {/* Nav button */}
         {isHost && (
-          <div className="mt-12 flex justify-center">
+          <div style={{ marginTop: 32, display: 'flex', justifyContent: 'center' }}>
             <button
               onClick={nextStep}
-              className="group relative flex items-center gap-5 rounded-[1.75rem] px-12 py-5 font-black text-xl tracking-tight overflow-hidden transition-all duration-200 active:scale-95"
               style={{
+                display: 'flex', alignItems: 'center', gap: 20,
+                padding: '18px 44px', borderRadius: 26, border: 'none', cursor: 'pointer',
+                fontWeight: 900, fontSize: 18, letterSpacing: '-0.02em',
                 background: phase === 'REVEAL' ? 'rgba(255,255,255,0.05)' : '#ffffff',
                 color: phase === 'REVEAL' ? '#ffffff' : '#020205',
-                border:
-                  phase === 'REVEAL'
-                    ? '1px solid rgba(16,185,129,0.35)'
-                    : '1px solid transparent',
-                boxShadow:
-                  phase === 'REVEAL'
-                    ? '0 0 40px rgba(16,185,129,0.15), 0 20px 40px rgba(0,0,0,0.4)'
-                    : '0 20px 40px rgba(0,0,0,0.5)',
+                outline: phase === 'REVEAL' ? '1px solid rgba(16,185,129,0.35)' : 'none',
+                boxShadow: phase === 'REVEAL'
+                  ? '0 0 40px rgba(16,185,129,0.15), 0 20px 40px rgba(0,0,0,0.4)'
+                  : '0 20px 40px rgba(0,0,0,0.5)',
+                transition: 'transform 0.15s',
               }}
+              onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.02)')}
+              onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
+              onMouseDown={e => (e.currentTarget.style.transform = 'scale(0.97)')}
             >
-              <span className="relative z-10">
-                {phase === 'QUESTION' ? 'חשוף תוצאה' : 'לשאלה הבאה'}
-              </span>
-              <ChevronLeft
-                className="w-6 h-6 relative z-10 transition-transform duration-300 group-hover:-translate-x-1"
-              />
-              {/* shimmer */}
-              <div
-                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                style={{
-                  background:
-                    'linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.08) 50%, transparent 70%)',
-                }}
-              />
+              {phase === 'QUESTION' ? 'חשוף תוצאה' : 'לשאלה הבאה'}
+              <ChevronLeft size={22} />
             </button>
           </div>
         )}
       </main>
 
       {/* ── FOOTER ── */}
-      <footer className="relative z-20 py-6 text-center">
-        <p className="text-[9px] font-mono uppercase tracking-[0.4em] text-white/10">
-          Room: {roomId} &bull; Platform 2.0.4
+      <footer style={{ position: 'relative', zIndex: 20, padding: '12px 0', textAlign: 'center', flexShrink: 0 }}>
+        <p style={{ fontSize: 9, fontFamily: 'monospace', letterSpacing: '0.4em', color: 'rgba(255,255,255,0.08)', textTransform: 'uppercase' }}>
+          Room: {roomId} • Platform 2.0.4
         </p>
       </footer>
-
-      {/* Keyframe injection */}
-      <style>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.6; }
-        }
-        @keyframes bounce {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-10px); }
-        }
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-        @keyframes zoomIn {
-          from { opacity: 0; transform: scale(0.85) translateY(12px); }
-          to   { opacity: 1; transform: scale(1) translateY(0); }
-        }
-      `}</style>
     </div>
   );
 };
