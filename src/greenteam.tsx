@@ -130,7 +130,7 @@ const GreenTeamWins: React.FC<GreenTeamWinsProps> = ({ gameData, roomId, isHost 
   /* ── Empty state ── */
   if (questions.length === 0) {
     return (
-      <div className="min-h-screen bg-[#020205] text-white flex items-center justify-center" dir="rtl">
+      <div className="bg-[#020205] text-white flex items-center justify-center" dir="rtl" style={{ position: 'fixed', inset: 0 }}>
         <div className="flex flex-col items-center gap-6">
           <div
             className="w-16 h-16 rounded-full border-2 border-transparent"
@@ -175,8 +175,8 @@ const GreenTeamWins: React.FC<GreenTeamWinsProps> = ({ gameData, roomId, isHost 
     return (
       <div
         dir="rtl"
-        className="min-h-screen bg-[#020205] text-white flex flex-col items-center justify-center overflow-hidden relative"
-        style={{ fontFamily: "'Helvetica Neue', Arial, sans-serif" }}
+        className="bg-[#020205] text-white flex flex-col items-center justify-center overflow-hidden relative"
+        style={{ fontFamily: "'Helvetica Neue', Arial, sans-serif", position: 'fixed', inset: 0 }}
       >
         <AmbientOrbs phase="START" />
         <GrainOverlay />
@@ -274,8 +274,8 @@ const GreenTeamWins: React.FC<GreenTeamWinsProps> = ({ gameData, roomId, isHost 
     return (
       <div
         dir="rtl"
-        className="min-h-screen bg-[#020205] text-white flex flex-col items-center justify-center p-10 relative overflow-hidden"
-        style={{ fontFamily: "'Helvetica Neue', Arial, sans-serif" }}
+        className="bg-[#020205] text-white flex flex-col items-center justify-center p-10 relative overflow-hidden"
+        style={{ fontFamily: "'Helvetica Neue', Arial, sans-serif", position: 'fixed', inset: 0 }}
       >
         <AmbientOrbs phase="SUMMARY" />
         <GrainOverlay />
@@ -388,7 +388,8 @@ const GreenTeamWins: React.FC<GreenTeamWinsProps> = ({ gameData, roomId, isHost 
   return (
     <div
       dir="rtl"
-      className="min-h-screen bg-[#020205] text-white flex flex-col relative overflow-hidden"
+      className="bg-[#020205] text-white flex flex-col relative overflow-hidden"
+      style={{ fontFamily: "'Helvetica Neue', Arial, sans-serif", position: 'fixed', inset: 0 }}
       style={{ fontFamily: "'Helvetica Neue', Arial, sans-serif" }}
     >
       <AmbientOrbs phase={phase} />
