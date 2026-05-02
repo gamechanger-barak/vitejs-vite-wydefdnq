@@ -55,7 +55,7 @@ const AmbientOrbs = () => {
   }, []);
 
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0" aria-hidden>
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0" aria-hidden>
       <motion.div
         style={{
           x: orb1x, y: orb1y,
@@ -92,7 +92,7 @@ const AmbientOrbs = () => {
 // ─── Film Grain ───────────────────────────────────────────────────────────────
 
 const Grain = () => (
-  <div className="absolute inset-0 z-[200] pointer-events-none" aria-hidden
+  <div className="fixed inset-0 z-[200] pointer-events-none" aria-hidden
     style={{ opacity: 0.04, mixBlendMode: 'screen' }}>
     <svg style={{ width: '100%', height: '100%' }} viewBox="0 0 600 600">
       <filter id="grain">
@@ -107,7 +107,7 @@ const Grain = () => (
 // ─── Vignette ─────────────────────────────────────────────────────────────────
 
 const Vignette = () => (
-  <div className="absolute inset-0 z-[199] pointer-events-none" aria-hidden
+  <div className="fixed inset-0 z-[199] pointer-events-none" aria-hidden
     style={{ background: 'radial-gradient(ellipse at 50% 50%, transparent 50%, rgba(0,0,0,0.75) 100%)' }} />
 );
 
@@ -116,7 +116,7 @@ const Vignette = () => (
 const RevealFlash = ({ show }: { show: boolean }) => (
   <AnimatePresence>
     {show && (
-      <motion.div key="flash" className="absolute inset-0 z-[198] pointer-events-none"
+      <motion.div key="flash" className="fixed inset-0 z-[198] pointer-events-none"
         initial={{ opacity: 0 }}
         animate={{ opacity: [0, 0.6, 0] }}
         transition={{ duration: 0.75, times: [0, 0.15, 1] }}
@@ -292,16 +292,12 @@ export default function SayAnything({ gameData, roomId, isHost }: SayAnythingPro
 
   return (
     <div
-      className="relative z-50 overflow-hidden flex flex-col"
+      className="fixed inset-0 z-50 overflow-hidden flex flex-col"
       style={{
         background: '#06060f',
         color: '#ffffff',
         direction: 'rtl',
         fontFamily: "'Helvetica Neue', Arial, 'Noto Sans Hebrew', sans-serif",
-        width: '100%',
-        height: '100dvh',
-        minHeight: '100dvh',
-        maxHeight: '100dvh',
       }}
     >
       <AmbientOrbs />
@@ -358,36 +354,38 @@ export default function SayAnything({ gameData, roomId, isHost }: SayAnythingPro
                 <div className="h-px w-16" style={{ background: 'linear-gradient(to right, rgba(165,180,252,0.5), transparent)' }} />
               </motion.div>
 
-              <motion.div
-                  initial={{ opacity: 0, y: 32 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.18, duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
+              <div style={{ overflow: 'hidden', marginBottom: 4 }}>
+                <motion.div
+                  initial={{ y: '105%' }}
+                  animate={{ y: 0 }}
+                  transition={{ delay: 0.18, duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
                   className="font-black italic tracking-tighter leading-none select-none"
                   style={{
-                    fontSize: 'clamp(64px, 13vw, 160px)',
+                    fontSize: 'clamp(72px, 15vw, 180px)',
                     background: 'linear-gradient(160deg, #ffffff 20%, rgba(255,255,255,0.92) 60%)',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
-                    marginBottom: 2,
                   }}
                 >
                   SAY
                 </motion.div>
+              </div>
+              <div style={{ overflow: 'hidden', marginBottom: 40 }}>
                 <motion.div
-                  initial={{ opacity: 0, y: 32 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.30, duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
+                  initial={{ y: '105%' }}
+                  animate={{ y: 0 }}
+                  transition={{ delay: 0.30, duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
                   className="font-black italic tracking-tighter leading-none select-none"
                   style={{
-                    fontSize: 'clamp(64px, 13vw, 160px)',
+                    fontSize: 'clamp(72px, 15vw, 180px)',
                     background: 'linear-gradient(160deg, #a5b4fc 0%, #818cf8 40%, #c084fc 100%)',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
-                    marginBottom: 36,
                   }}
                 >
                   ANYTHING
                 </motion.div>
+              </div>
 
               <motion.p
                 initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}
