@@ -5,116 +5,83 @@ npm install -D @types/canvas-confetti
 
 import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import { 
-  Trophy, 
-  Play, 
-  ChevronRight, 
-  Users, 
-  MessageSquare, 
+import {
+  Trophy,
+  Play,
+  ChevronRight,
+  Users,
+  MessageSquare,
   RotateCcw,
-  Info,
-  Sparkles
+  Zap,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
-// --- Types ---
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface GamePrompt {
   prompt: string;
   category?: string;
 }
-
 interface GameData {
   content?: GamePrompt[];
-  [key: string]: any; 
+  [key: string]: any;
 }
-
 interface SayAnythingProps {
   gameData: GameData | GamePrompt[];
   roomId: string;
   isHost: boolean;
 }
-
 type GamePhase = 'START' | 'QUESTION' | 'JUDGING' | 'REVEAL' | 'SUMMARY';
 
-// --- Sub-Components: Visual Effects ---
+// ─── Background Orbs ─────────────────────────────────────────────────────────
 
 const AmbientOrbs = () => {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
-  const smoothX = useSpring(mouseX, { stiffness: 20, damping: 30 });
-  const smoothY = useSpring(mouseY, { stiffness: 20, damping: 30 });
-  const orb1X = useTransform(smoothX, [-500, 500], [-30, 30]);
-  const orb1Y = useTransform(smoothY, [-500, 500], [-20, 20]);
-  const orb2X = useTransform(smoothX, [-500, 500], [20, -20]);
-  const orb2Y = useTransform(smoothY, [-500, 500], [15, -15]);
+  const sx = useSpring(mouseX, { stiffness: 15, damping: 35 });
+  const sy = useSpring(mouseY, { stiffness: 15, damping: 35 });
+  const orb1x = useTransform(sx, [-600, 600], [-25, 25]);
+  const orb1y = useTransform(sy, [-600, 600], [-18, 18]);
+  const orb2x = useTransform(sx, [-600, 600], [18, -18]);
+  const orb2y = useTransform(sy, [-600, 600], [12, -12]);
 
   useEffect(() => {
-    const handleMove = (e: MouseEvent) => {
+    const handler = (e: MouseEvent) => {
       mouseX.set(e.clientX - window.innerWidth / 2);
       mouseY.set(e.clientY - window.innerHeight / 2);
     };
-    window.addEventListener('mousemove', handleMove);
-    return () => window.removeEventListener('mousemove', handleMove);
+    window.addEventListener('mousemove', handler);
+    return () => window.removeEventListener('mousemove', handler);
   }, []);
 
   return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-      {/* Primary deep indigo orb - top left */}
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0" aria-hidden>
       <motion.div
         style={{
-          x: orb1X,
-          y: orb1Y,
-          background: 'radial-gradient(ellipse at center, rgba(79,70,229,0.35) 0%, rgba(67,56,202,0.15) 40%, transparent 75%)',
-          filter: 'blur(80px)',
+          x: orb1x, y: orb1y,
+          background: 'radial-gradient(ellipse at center, rgba(99,102,241,0.55) 0%, rgba(79,70,229,0.25) 45%, transparent 72%)',
+          filter: 'blur(70px)',
         }}
-        animate={{
-          scale: [1, 1.15, 0.95, 1],
-          opacity: [0.25, 0.40, 0.30, 0.25],
-        }}
-        transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute -top-[15%] -left-[5%] w-[65%] h-[65%] rounded-full"
+        animate={{ scale: [1, 1.12, 0.94, 1], opacity: [0.7, 1, 0.8, 0.7] }}
+        transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
+        className="absolute -top-[20%] -left-[8%] w-[70%] h-[70%] rounded-full"
       />
-      {/* Secondary violet orb - bottom right */}
       <motion.div
         style={{
-          x: orb2X,
-          y: orb2Y,
-          background: 'radial-gradient(ellipse at center, rgba(139,92,246,0.30) 0%, rgba(124,58,237,0.12) 45%, transparent 75%)',
-          filter: 'blur(90px)',
+          x: orb2x, y: orb2y,
+          background: 'radial-gradient(ellipse at center, rgba(139,92,246,0.50) 0%, rgba(109,40,217,0.20) 50%, transparent 72%)',
+          filter: 'blur(85px)',
         }}
-        animate={{
-          scale: [1.1, 0.9, 1.2, 1.1],
-          opacity: [0.20, 0.35, 0.25, 0.20],
-        }}
-        transition={{ duration: 28, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute -bottom-[15%] -right-[5%] w-[55%] h-[55%] rounded-full"
+        animate={{ scale: [1.08, 0.92, 1.15, 1.08], opacity: [0.6, 0.9, 0.7, 0.6] }}
+        transition={{ duration: 26, repeat: Infinity, ease: 'easeInOut' }}
+        className="absolute -bottom-[18%] -right-[8%] w-[60%] h-[60%] rounded-full"
       />
-      {/* Tertiary faint rose accent - center */}
       <motion.div
-        animate={{
-          scale: [1, 1.3, 0.8, 1],
-          opacity: [0.05, 0.12, 0.08, 0.05],
-          x: [0, 60, -30, 0],
-          y: [0, -40, 20, 0],
-        }}
-        transition={{ duration: 35, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-[30%] left-[30%] w-[40%] h-[40%] rounded-full"
+        animate={{ opacity: [0.15, 0.32, 0.15], scale: [1, 1.2, 1] }}
+        transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut', delay: 4 }}
+        className="absolute top-0 right-[15%] w-[30%] h-[40%] rounded-full"
         style={{
-          background: 'radial-gradient(ellipse at center, rgba(217,70,239,0.20) 0%, transparent 70%)',
-          filter: 'blur(120px)',
-        }}
-      />
-      {/* Deep sapphire top-right accent */}
-      <motion.div
-        animate={{
-          scale: [0.9, 1.1, 1, 0.9],
-          opacity: [0.10, 0.22, 0.15, 0.10],
-        }}
-        transition={{ duration: 20, repeat: Infinity, ease: "easeInOut", delay: 5 }}
-        className="absolute -top-[5%] right-[10%] w-[35%] h-[45%] rounded-full"
-        style={{
-          background: 'radial-gradient(ellipse at center, rgba(56,189,248,0.15) 0%, transparent 70%)',
+          background: 'radial-gradient(ellipse at center, rgba(34,211,238,0.22) 0%, transparent 70%)',
           filter: 'blur(100px)',
         }}
       />
@@ -122,126 +89,153 @@ const AmbientOrbs = () => {
   );
 };
 
-const GrainOverlay = () => (
-  <div
-    className="fixed inset-0 z-[100] pointer-events-none"
-    style={{
-      opacity: 0.055,
-      mixBlendMode: 'overlay',
-    }}
-  >
-    <svg
-      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
-      viewBox="0 0 512 512"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <filter id="filmGrain">
-        <feTurbulence
-          type="fractalNoise"
-          baseFrequency="0.80"
-          numOctaves="4"
-          seed="15"
-          stitchTiles="stitch"
-        />
+// ─── Film Grain ───────────────────────────────────────────────────────────────
+
+const Grain = () => (
+  <div className="fixed inset-0 z-[200] pointer-events-none" aria-hidden
+    style={{ opacity: 0.04, mixBlendMode: 'screen' }}>
+    <svg style={{ width: '100%', height: '100%' }} viewBox="0 0 600 600">
+      <filter id="grain">
+        <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="4" seed="9" stitchTiles="stitch" />
         <feColorMatrix type="saturate" values="0" />
       </filter>
-      <rect width="100%" height="100%" filter="url(#filmGrain)" />
+      <rect width="100%" height="100%" filter="url(#grain)" />
     </svg>
   </div>
 );
 
-// Scanline vignette for extra depth
+// ─── Vignette ─────────────────────────────────────────────────────────────────
+
 const Vignette = () => (
-  <div
-    className="fixed inset-0 z-[99] pointer-events-none"
-    style={{
-      background: 'radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.65) 100%)',
-    }}
-  />
+  <div className="fixed inset-0 z-[199] pointer-events-none" aria-hidden
+    style={{ background: 'radial-gradient(ellipse at 50% 50%, transparent 50%, rgba(0,0,0,0.75) 100%)' }} />
 );
 
-// Horizontal light streak — decorative
-const LightStreak = ({ visible }: { visible: boolean }) => (
+// ─── Flash overlay for REVEAL ─────────────────────────────────────────────────
+
+const RevealFlash = ({ show }: { show: boolean }) => (
   <AnimatePresence>
-    {visible && (
-      <motion.div
-        key="streak"
-        initial={{ scaleX: 0, opacity: 0 }}
-        animate={{ scaleX: 1, opacity: [0, 0.7, 0] }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-        className="fixed top-1/2 left-0 right-0 z-[98] pointer-events-none"
-        style={{
-          height: '2px',
-          transformOrigin: 'left center',
-          background: 'linear-gradient(90deg, transparent 0%, rgba(139,92,246,0.8) 30%, rgba(255,255,255,0.9) 50%, rgba(99,102,241,0.8) 70%, transparent 100%)',
-          filter: 'blur(1px)',
-          boxShadow: '0 0 30px 10px rgba(139,92,246,0.4)',
-        }}
+    {show && (
+      <motion.div key="flash" className="fixed inset-0 z-[198] pointer-events-none"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: [0, 0.6, 0] }}
+        transition={{ duration: 0.75, times: [0, 0.15, 1] }}
+        style={{ background: 'radial-gradient(ellipse at center, rgba(167,139,250,0.7) 0%, rgba(99,102,241,0.35) 50%, transparent 75%)' }}
       />
     )}
   </AnimatePresence>
 );
 
-// Glassy card wrapper
-const GlassCard = ({
-  children,
-  className = '',
-  intensity = 'medium',
-}: {
-  children: React.ReactNode;
-  className?: string;
-  intensity?: 'low' | 'medium' | 'high';
-}) => {
-  const configs = {
-    low:    { bg: 'rgba(255,255,255,0.02)', border: 'rgba(255,255,255,0.06)', blur: '20px', shadow: '0 8px 32px rgba(0,0,0,0.4)' },
-    medium: { bg: 'rgba(255,255,255,0.035)', border: 'rgba(255,255,255,0.09)', blur: '40px', shadow: '0 16px 64px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08)' },
-    high:   { bg: 'rgba(255,255,255,0.055)', border: 'rgba(255,255,255,0.12)', blur: '60px', shadow: '0 24px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -1px 0 rgba(0,0,0,0.2)' },
-  };
-  const c = configs[intensity];
-  return (
-    <div
-      className={className}
-      style={{
-        background: c.bg,
-        backdropFilter: `blur(${c.blur})`,
-        WebkitBackdropFilter: `blur(${c.blur})`,
-        border: `1px solid ${c.border}`,
-        boxShadow: c.shadow,
-        borderRadius: '28px',
-      }}
-    >
-      {children}
-    </div>
-  );
-};
+// ─── Progress dots ────────────────────────────────────────────────────────────
 
-// Progress pill
-const ProgressBar = ({ current, total }: { current: number; total: number }) => (
-  <div className="flex gap-1.5">
+const ProgressDots = ({ current, total }: { current: number; total: number }) => (
+  <div className="flex gap-2 items-center">
     {Array.from({ length: total }).map((_, i) => (
-      <motion.div
-        key={i}
-        className="h-1 rounded-full"
-        initial={false}
+      <motion.div key={i}
         animate={{
-          width: i === current ? 28 : 8,
-          backgroundColor: i < current ? 'rgba(99,102,241,0.7)' : i === current ? '#6366f1' : 'rgba(255,255,255,0.12)',
+          width: i === current ? 24 : 6,
+          backgroundColor: i < current
+            ? 'rgba(99,102,241,0.9)'
+            : i === current
+            ? '#a5b4fc'
+            : 'rgba(255,255,255,0.2)',
         }}
-        transition={{ duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
+        transition={{ duration: 0.35, ease: [0.34, 1.56, 0.64, 1] }}
+        className="h-[5px] rounded-full"
       />
     ))}
   </div>
 );
 
+// ─── Accent badge ─────────────────────────────────────────────────────────────
 
-// --- Main Component ---
+const Badge = ({ children }: { children: React.ReactNode }) => (
+  <span
+    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase"
+    style={{
+      background: 'rgba(99,102,241,0.18)',
+      border: '1px solid rgba(165,180,252,0.35)',
+      color: '#c7d2fe',
+      letterSpacing: '0.14em',
+    }}
+  >
+    {children}
+  </span>
+);
+
+// ─── Divider ──────────────────────────────────────────────────────────────────
+
+const Divider = () => (
+  <div className="w-full h-px my-6"
+    style={{ background: 'linear-gradient(90deg, transparent, rgba(165,180,252,0.25) 50%, transparent)' }} />
+);
+
+// ─── Primary button (white, for START) ───────────────────────────────────────
+
+const PrimaryButton = ({ onClick, children }: { onClick: () => void; children: React.ReactNode }) => (
+  <motion.button
+    onClick={onClick}
+    whileHover={{ scale: 1.04 }}
+    whileTap={{ scale: 0.97 }}
+    className="relative inline-flex items-center gap-3 px-12 py-5 rounded-full overflow-hidden font-black text-xl text-black"
+    style={{
+      background: 'linear-gradient(135deg, #e0e7ff 0%, #ffffff 60%, #c7d2fe 100%)',
+      boxShadow: '0 0 50px rgba(99,102,241,0.5), 0 12px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.9)',
+    }}
+  >
+    <motion.div
+      className="absolute inset-0 pointer-events-none"
+      animate={{ x: ['-160%', '200%'] }}
+      transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 1.2, ease: 'easeInOut' }}
+      style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent)', width: '50%' }}
+    />
+    <span className="relative">{children}</span>
+  </motion.button>
+);
+
+// ─── Ghost button ─────────────────────────────────────────────────────────────
+
+const GhostButton = ({ onClick, children }: { onClick: () => void; children: React.ReactNode }) => (
+  <motion.button
+    onClick={onClick}
+    whileHover={{ scale: 1.04 }}
+    whileTap={{ scale: 0.97 }}
+    className="inline-flex items-center gap-3 px-8 py-4 rounded-full font-bold text-base"
+    style={{
+      background: 'rgba(99,102,241,0.10)',
+      border: '1px solid rgba(165,180,252,0.30)',
+      color: '#e0e7ff',
+      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
+    }}
+  >
+    {children}
+  </motion.button>
+);
+
+// ─── Score chip ───────────────────────────────────────────────────────────────
+
+const ScoreChip = ({ label, value, color }: { label: string; value: string; color: string }) => (
+  <div
+    className="flex flex-col items-center justify-center p-6 rounded-3xl"
+    style={{
+      background: 'rgba(255,255,255,0.04)',
+      border: '1px solid rgba(255,255,255,0.09)',
+      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07)',
+    }}
+  >
+    <span className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: 'rgba(255,255,255,0.55)' }}>
+      {label}
+    </span>
+    <span className="text-5xl font-black" style={{ color }}>{value}</span>
+  </div>
+);
+
+// ─── Main component ───────────────────────────────────────────────────────────
 
 export default function SayAnything({ gameData, roomId, isHost }: SayAnythingProps) {
   const [phase, setPhase] = useState<GamePhase>('START');
   const [currentIdx, setCurrentIdx] = useState(0);
-  const [showStreak, setShowStreak] = useState(false);
-  const [revealFlash, setRevealFlash] = useState(false);
+  const [flash, setFlash] = useState(false);
 
   const questions = useMemo(() => {
     if (Array.isArray(gameData)) return gameData;
@@ -251,61 +245,26 @@ export default function SayAnything({ gameData, roomId, isHost }: SayAnythingPro
 
   const currentQuestion = questions[currentIdx];
 
-  const triggerConfetti = () => {
-    // First burst — wide
-    confetti({
-      particleCount: 80,
-      spread: 100,
-      origin: { y: 0.55, x: 0.35 },
-      colors: ['#6366f1', '#8b5cf6', '#d946ef', '#ffffff'],
-      gravity: 0.8,
-      scalar: 1.1,
-    });
-    // Second burst — tight
-    setTimeout(() => {
-      confetti({
-        particleCount: 60,
-        spread: 60,
-        origin: { y: 0.55, x: 0.65 },
-        colors: ['#a78bfa', '#c4b5fd', '#f0abfc', '#e0e7ff'],
-        gravity: 0.9,
-        scalar: 0.9,
-      });
-    }, 180);
-    // Stars burst
-    setTimeout(() => {
-      confetti({
-        particleCount: 40,
-        spread: 130,
-        origin: { y: 0.45 },
-        shapes: ['star'],
-        colors: ['#fbbf24', '#f59e0b', '#fcd34d'],
-        gravity: 0.7,
-        scalar: 1.3,
-      });
-    }, 350);
-  };
-
-  const fireStreak = () => {
-    setShowStreak(true);
-    setTimeout(() => setShowStreak(false), 1000);
+  const fireConfetti = () => {
+    confetti({ particleCount: 90, spread: 110, origin: { y: 0.55, x: 0.3 }, colors: ['#6366f1', '#8b5cf6', '#e0e7ff', '#ffffff'], scalar: 1.1 });
+    setTimeout(() => confetti({ particleCount: 60, spread: 70, origin: { y: 0.5, x: 0.7 }, colors: ['#a78bfa', '#c4b5fd', '#f0abfc'], scalar: 0.9 }), 200);
+    setTimeout(() => confetti({ particleCount: 35, spread: 140, shapes: ['star'], colors: ['#fbbf24', '#fcd34d'], scalar: 1.3, origin: { y: 0.4 } }), 400);
   };
 
   const nextPhase = () => {
-    fireStreak();
     if (phase === 'START') {
       setPhase('QUESTION');
     } else if (phase === 'QUESTION') {
       setPhase('JUDGING');
     } else if (phase === 'JUDGING') {
-      setRevealFlash(true);
-      setTimeout(() => setRevealFlash(false), 800);
+      setFlash(true);
+      setTimeout(() => setFlash(false), 800);
       setPhase('REVEAL');
-      triggerConfetti();
+      fireConfetti();
     } else if (phase === 'REVEAL') {
       if (currentIdx < questions.length - 1) {
+        setCurrentIdx(p => p + 1);
         setPhase('QUESTION');
-        setCurrentIdx(prev => prev + 1);
       } else {
         setPhase('SUMMARY');
       }
@@ -314,562 +273,439 @@ export default function SayAnything({ gameData, roomId, isHost }: SayAnythingPro
 
   if (questions.length === 0) {
     return (
-      <div className="fixed inset-0 bg-[#020205] flex items-center justify-center text-white">
+      <div className="fixed inset-0 flex items-center justify-center" style={{ background: '#06060f' }}>
         <motion.div
           animate={{ rotate: 360 }}
-          transition={{ repeat: Infinity, duration: 1.2, ease: 'linear' }}
-          className="w-12 h-12 rounded-full"
-          style={{
-            border: '3px solid rgba(99,102,241,0.2)',
-            borderTopColor: '#6366f1',
-          }}
+          transition={{ duration: 1.1, repeat: Infinity, ease: 'linear' }}
+          className="w-10 h-10 rounded-full"
+          style={{ border: '2px solid rgba(99,102,241,0.2)', borderTopColor: '#818cf8' }}
         />
       </div>
     );
   }
 
-  // Phase label mapping
-  const phaseLabel: Record<GamePhase, string> = {
-    START: 'פתיחה',
-    QUESTION: 'שאלה פעילה',
-    JUDGING: 'שיפוט',
-    REVEAL: 'חשיפה',
-    SUMMARY: 'סיכום',
-  };
+  const nextLabel =
+    phase === 'REVEAL' && currentIdx < questions.length - 1 ? 'לשאלה הבאה'
+    : phase === 'REVEAL' ? 'לסיכום'
+    : phase === 'JUDGING' ? 'חשפו את הזוכה'
+    : 'המשך';
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-[#020205] text-white overflow-hidden flex flex-col"
-      style={{ direction: 'rtl', fontFamily: "'Helvetica Neue', Arial, sans-serif" }}
+      className="fixed inset-0 z-50 overflow-hidden flex flex-col"
+      style={{
+        background: '#06060f',
+        color: '#ffffff',
+        direction: 'rtl',
+        fontFamily: "'Helvetica Neue', Arial, 'Noto Sans Hebrew', sans-serif",
+      }}
     >
       <AmbientOrbs />
-      <GrainOverlay />
+      <Grain />
       <Vignette />
-      <LightStreak visible={showStreak} />
+      <RevealFlash show={flash} />
 
-      {/* Reveal flash overlay */}
-      <AnimatePresence>
-        {revealFlash && (
-          <motion.div
-            key="flash"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0, 0.5, 0] }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.8, times: [0, 0.2, 1] }}
-            className="fixed inset-0 z-[97] pointer-events-none"
-            style={{
-              background: 'radial-gradient(ellipse at center, rgba(139,92,246,0.6) 0%, rgba(99,102,241,0.3) 40%, transparent 70%)',
-            }}
-          />
-        )}
-      </AnimatePresence>
-
-      {/* Top bar */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
+      {/* ── Top bar ──────────────────────────────────────────────────────────── */}
+      <motion.header
+        initial={{ opacity: 0, y: -16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4, duration: 0.6 }}
-        className="absolute top-0 left-0 right-0 flex justify-between items-center z-10 px-8 py-6"
+        transition={{ delay: 0.3, duration: 0.6 }}
+        className="relative z-10 flex justify-between items-center px-8 pt-7 shrink-0"
       >
-        {/* Room tag */}
-        <GlassCard intensity="low" className="px-4 py-2 flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5">
           <motion.div
-            animate={{ opacity: [1, 0.4, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="w-2 h-2 rounded-full bg-emerald-400"
-            style={{ boxShadow: '0 0 6px rgba(52,211,153,0.8)' }}
+            animate={{ opacity: [1, 0.3, 1] }}
+            transition={{ duration: 2.2, repeat: Infinity }}
+            className="w-2 h-2 rounded-full"
+            style={{ background: '#34d399', boxShadow: '0 0 8px #34d399' }}
           />
-          <span className="text-xs font-semibold tracking-[0.12em] uppercase text-white/50">
+          <span className="text-xs font-bold tracking-[0.18em] uppercase" style={{ color: 'rgba(255,255,255,0.45)' }}>
             {roomId}
           </span>
-        </GlassCard>
-
-        {/* Phase indicator + progress */}
-        <div className="flex flex-col items-center gap-2">
-          <span className="text-xs font-semibold tracking-[0.15em] uppercase text-white/25">
-            {phaseLabel[phase]}
-          </span>
-          <ProgressBar current={currentIdx} total={questions.length} />
         </div>
 
-        {/* Counter */}
-        <GlassCard intensity="low" className="px-4 py-2">
-          <span className="text-xs font-semibold text-white/50 tabular-nums">
-            <span className="text-white/80">{currentIdx + 1}</span>
-            <span> / {questions.length}</span>
-          </span>
-        </GlassCard>
-      </motion.div>
+        <ProgressDots current={currentIdx} total={questions.length} />
 
-      {/* Main content */}
-      <div className="flex-1 flex items-center justify-center p-10 z-10">
+        <span className="text-xs font-bold tabular-nums" style={{ color: 'rgba(255,255,255,0.35)' }}>
+          <span style={{ color: 'rgba(255,255,255,0.85)' }}>{currentIdx + 1}</span>
+          {' '}/ {questions.length}
+        </span>
+      </motion.header>
+
+      {/* ── Phase content ─────────────────────────────────────────────────────── */}
+      <main className="flex-1 flex items-center justify-center px-8 py-6 z-10 relative overflow-hidden">
         <AnimatePresence mode="wait">
 
-          {/* ── START ── */}
+          {/* ══ START ══════════════════════════════════════════════════════════ */}
           {phase === 'START' && (
-            <motion.div
-              key="start"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0, filter: 'blur(12px)', scale: 1.04 }}
-              transition={{ duration: 0.6 }}
-              className="text-center max-w-5xl w-full"
+            <motion.div key="start"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              exit={{ opacity: 0, filter: 'blur(16px)', scale: 1.03 }}
+              transition={{ duration: 0.55 }}
+              className="text-center w-full max-w-5xl"
             >
-              {/* Overline */}
               <motion.div
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1, duration: 0.6 }}
-                className="flex items-center justify-center gap-3 mb-8"
+                initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1, duration: 0.55 }}
+                className="flex items-center justify-center gap-4 mb-7"
               >
-                <div className="h-px w-12 bg-gradient-to-l from-indigo-500/60 to-transparent" />
-                <span className="text-xs font-bold tracking-[0.25em] uppercase text-indigo-400/80">
-                  משחק מסיבה
-                </span>
-                <div className="h-px w-12 bg-gradient-to-r from-indigo-500/60 to-transparent" />
+                <div className="h-px w-16" style={{ background: 'linear-gradient(to left, rgba(165,180,252,0.5), transparent)' }} />
+                <Badge>משחק מסיבה</Badge>
+                <div className="h-px w-16" style={{ background: 'linear-gradient(to right, rgba(165,180,252,0.5), transparent)' }} />
               </motion.div>
 
-              {/* Massive title */}
-              <div
-                className="mb-6 leading-none italic font-black tracking-tighter text-right"
-                style={{
-                  fontSize: 'clamp(64px, 14vw, 170px)',
-                  lineHeight: 0.9,
-                }}
-              >
-                <div style={{ overflow: 'hidden' }}>
-                  <motion.div
-                    initial={{ y: '110%' }}
-                    animate={{ y: 0 }}
-                    transition={{ delay: 0.2, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-                    style={{
-                      background: 'linear-gradient(170deg, #ffffff 30%, rgba(255,255,255,0.35) 100%)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                    }}
-                  >
-                    SAY
-                  </motion.div>
-                </div>
-                <div style={{ overflow: 'hidden' }}>
-                  <motion.div
-                    initial={{ y: '110%' }}
-                    animate={{ y: 0 }}
-                    transition={{ delay: 0.32, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-                    style={{
-                      background: 'linear-gradient(170deg, rgba(255,255,255,0.9) 20%, rgba(139,92,246,0.6) 100%)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                    }}
-                  >
-                    ANYTHING
-                  </motion.div>
-                </div>
+              <div style={{ overflow: 'hidden', marginBottom: 4 }}>
+                <motion.div
+                  initial={{ y: '105%' }}
+                  animate={{ y: 0 }}
+                  transition={{ delay: 0.18, duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
+                  className="font-black italic tracking-tighter leading-none select-none"
+                  style={{
+                    fontSize: 'clamp(72px, 15vw, 180px)',
+                    background: 'linear-gradient(160deg, #ffffff 20%, rgba(255,255,255,0.92) 60%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                  }}
+                >
+                  SAY
+                </motion.div>
+              </div>
+              <div style={{ overflow: 'hidden', marginBottom: 40 }}>
+                <motion.div
+                  initial={{ y: '105%' }}
+                  animate={{ y: 0 }}
+                  transition={{ delay: 0.30, duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
+                  className="font-black italic tracking-tighter leading-none select-none"
+                  style={{
+                    fontSize: 'clamp(72px, 15vw, 180px)',
+                    background: 'linear-gradient(160deg, #a5b4fc 0%, #818cf8 40%, #c084fc 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                  }}
+                >
+                  ANYTHING
+                </motion.div>
               </div>
 
-              {/* Sub */}
               <motion.p
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6, duration: 0.7 }}
-                className="text-lg text-white/35 mb-12 max-w-md mx-auto leading-relaxed text-right"
-                style={{ fontWeight: 400 }}
+                initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.52, duration: 0.6 }}
+                className="text-xl mb-12 leading-relaxed mx-auto max-w-lg"
+                style={{ color: 'rgba(255,255,255,0.65)', fontWeight: 400 }}
               >
-                דעות חלוקות. תשובות גרועות. בחירות מפוקפקות.
+                דעות חלוקות, תשובות גרועות ובחירות מפוקפקות.
                 <br />
                 בחרו שופט/ת לסיבוב הראשון.
               </motion.p>
 
               {isHost && (
                 <motion.div
-                  initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ delay: 0.75, duration: 0.6, ease: [0.34, 1.56, 0.64, 1] }}
+                  initial={{ opacity: 0, y: 22, scale: 0.94 }} animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ delay: 0.68, duration: 0.6, type: 'spring', stiffness: 180, damping: 18 }}
                 >
-                  <motion.button
-                    onClick={nextPhase}
-                    whileHover={{ scale: 1.04 }}
-                    whileTap={{ scale: 0.96 }}
-                    className="group relative inline-flex items-center gap-3 px-12 py-5 rounded-full overflow-hidden font-black text-lg text-black"
-                    style={{
-                      background: 'linear-gradient(135deg, #ffffff 0%, rgba(224,231,255,0.95) 100%)',
-                      boxShadow: '0 0 40px rgba(139,92,246,0.3), 0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.8)',
-                    }}
-                  >
-                    {/* Shimmer */}
-                    <motion.div
-                      className="absolute inset-0 pointer-events-none"
-                      animate={{ x: ['-200%', '200%'] }}
-                      transition={{ duration: 3, repeat: Infinity, ease: 'linear', repeatDelay: 1 }}
-                      style={{
-                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)',
-                        width: '60%',
-                      }}
-                    />
-                    <Play fill="black" size={18} />
-                    <span className="relative">התחלנו</span>
-                  </motion.button>
+                  <PrimaryButton onClick={nextPhase}>
+                    <Play fill="black" size={20} />
+                    התחלנו
+                  </PrimaryButton>
                 </motion.div>
               )}
             </motion.div>
           )}
 
-          {/* ── QUESTION ── */}
+          {/* ══ QUESTION ═══════════════════════════════════════════════════════ */}
           {phase === 'QUESTION' && (
-            <motion.div
-              key={`question-${currentIdx}`}
-              initial={{ opacity: 0, y: 40, filter: 'blur(8px)' }}
+            <motion.div key={`q-${currentIdx}`}
+              initial={{ opacity: 0, y: 50, filter: 'blur(10px)' }}
               animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-              exit={{ opacity: 0, y: -40, filter: 'blur(8px)' }}
-              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-              className="text-center w-full max-w-6xl"
+              exit={{ opacity: 0, y: -40, filter: 'blur(10px)' }}
+              transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+              className="w-full max-w-6xl text-center"
             >
-              {/* Category badge */}
               <motion.div
-                initial={{ opacity: 0, scale: 0.85 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.15, duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
+                initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.12, duration: 0.45, type: 'spring', stiffness: 200 }}
                 className="flex justify-center mb-8"
               >
-                <GlassCard intensity="medium" className="px-5 py-2 flex items-center gap-2.5">
-                  <Sparkles size={14} className="text-indigo-400" />
-                  <span className="text-sm font-bold tracking-[0.12em] uppercase text-indigo-300/90">
-                    {currentQuestion.category || 'כללי'}
-                  </span>
-                </GlassCard>
+                <Badge>{currentQuestion.category || 'כללי'}</Badge>
               </motion.div>
 
-              {/* The Prompt — spring physics */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.88, y: 20 }}
+              <motion.h2
+                initial={{ opacity: 0, scale: 0.9, y: 24 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{
-                  delay: 0.25,
-                  duration: 0.9,
-                  type: 'spring',
-                  stiffness: 80,
-                  damping: 15,
+                transition={{ delay: 0.22, duration: 0.8, type: 'spring', stiffness: 70, damping: 13 }}
+                className="font-black tracking-tighter text-right mb-10 leading-[1.06]"
+                style={{
+                  fontSize: 'clamp(40px, 7vw, 100px)',
+                  color: '#ffffff',
+                  textShadow: '0 0 80px rgba(99,102,241,0.4)',
                 }}
-                className="mb-10"
               >
-                <h2
-                  className="font-black tracking-tighter text-right leading-[1.05]"
-                  style={{
-                    fontSize: 'clamp(38px, 6.5vw, 96px)',
-                    background: 'linear-gradient(160deg, #ffffff 0%, rgba(255,255,255,0.75) 60%, rgba(139,92,246,0.5) 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    textShadow: 'none',
-                  }}
-                >
-                  {currentQuestion.prompt}
-                </h2>
-              </motion.div>
+                {currentQuestion.prompt}
+              </motion.h2>
 
-              {/* Instruction chip */}
+              <Divider />
+
               <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.55, duration: 0.6 }}
+                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.48, duration: 0.5 }}
                 className="flex justify-center"
               >
-                <GlassCard intensity="low" className="flex items-center gap-3 px-8 py-4">
-                  <MessageSquare size={18} className="text-indigo-400/80" />
-                  <span className="text-base text-white/45 font-medium">
+                <div
+                  className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl"
+                  style={{
+                    background: 'rgba(99,102,241,0.10)',
+                    border: '1px solid rgba(165,180,252,0.22)',
+                  }}
+                >
+                  <MessageSquare size={18} style={{ color: '#a5b4fc' }} />
+                  <span className="text-base font-semibold" style={{ color: 'rgba(255,255,255,0.85)' }}>
                     כולם כותבים תשובות עכשיו!
                   </span>
-                </GlassCard>
+                </div>
               </motion.div>
             </motion.div>
           )}
 
-          {/* ── JUDGING ── */}
+          {/* ══ JUDGING ════════════════════════════════════════════════════════ */}
           {phase === 'JUDGING' && (
-            <motion.div
-              key="judging"
-              initial={{ opacity: 0, scale: 0.9 }}
+            <motion.div key="judging"
+              initial={{ opacity: 0, scale: 0.88 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9, filter: 'blur(8px)' }}
+              exit={{ opacity: 0, scale: 0.92, filter: 'blur(8px)' }}
               transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-              className="text-center max-w-2xl"
+              className="text-center max-w-2xl w-full"
             >
-              {/* Icon ring */}
               <motion.div
-                initial={{ scale: 0.5, opacity: 0 }}
+                initial={{ scale: 0.4, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.1, duration: 0.7, type: 'spring', stiffness: 120, damping: 10 }}
+                transition={{ type: 'spring', stiffness: 160, damping: 11, delay: 0.05 }}
                 className="flex justify-center mb-10"
               >
                 <div className="relative">
-                  {/* Outer glow ring */}
                   <motion.div
-                    animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
-                    transition={{ duration: 3, repeat: Infinity }}
-                    className="absolute inset-0 rounded-full"
+                    animate={{ scale: [1, 1.4, 1], opacity: [0.4, 0.8, 0.4] }}
+                    transition={{ duration: 2.5, repeat: Infinity }}
+                    className="absolute rounded-full"
                     style={{
-                      background: 'radial-gradient(circle, rgba(99,102,241,0.4) 0%, transparent 70%)',
-                      filter: 'blur(16px)',
-                      transform: 'scale(1.5)',
+                      inset: -16,
+                      background: 'radial-gradient(circle, rgba(99,102,241,0.5) 0%, transparent 70%)',
+                      filter: 'blur(12px)',
                     }}
                   />
-                  <GlassCard intensity="high" className="w-24 h-24 flex items-center justify-center relative">
-                    <Users size={40} className="text-indigo-300" />
-                  </GlassCard>
+                  <div
+                    className="w-24 h-24 rounded-full flex items-center justify-center relative"
+                    style={{
+                      background: 'rgba(99,102,241,0.15)',
+                      border: '1.5px solid rgba(165,180,252,0.4)',
+                      boxShadow: '0 0 40px rgba(99,102,241,0.3), inset 0 1px 0 rgba(255,255,255,0.12)',
+                    }}
+                  >
+                    <Users size={42} style={{ color: '#a5b4fc' }} />
+                  </div>
                 </div>
               </motion.div>
 
               <motion.h2
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3, duration: 0.6 }}
-                className="font-black tracking-tighter mb-5"
-                style={{ fontSize: 'clamp(42px, 7vw, 80px)' }}
+                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.22, duration: 0.6 }}
+                className="font-black tracking-tighter mb-6"
+                style={{ fontSize: 'clamp(48px, 8vw, 86px)', color: '#ffffff' }}
               >
                 זמן הכרעה
               </motion.h2>
 
               <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.45, duration: 0.6 }}
+                initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.38, duration: 0.55 }}
               >
-                <GlassCard intensity="medium" className="p-8">
-                  <p className="text-xl text-white/55 leading-relaxed">
+                <div
+                  className="rounded-3xl px-10 py-8"
+                  style={{
+                    background: 'rgba(255,255,255,0.04)',
+                    border: '1px solid rgba(255,255,255,0.09)',
+                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
+                  }}
+                >
+                  <p className="text-xl leading-relaxed" style={{ color: 'rgba(255,255,255,0.80)' }}>
                     השופט/ת בוחר/ת בסתר את התשובה המועדפת.
                   </p>
-                  <div className="mt-4 h-px bg-gradient-to-l from-transparent via-white/10 to-transparent" />
-                  <p className="mt-4 text-xl text-white/55 leading-relaxed">
-                    כל השאר — נסו לנחש מה הם יבחרו!
+                  <div className="my-5 h-px" style={{ background: 'rgba(255,255,255,0.08)' }} />
+                  <p className="text-xl leading-relaxed" style={{ color: 'rgba(255,255,255,0.80)' }}>
+                    כל השאר — נסו לנחש מה יבחרו!
                   </p>
-                </GlassCard>
+                </div>
               </motion.div>
             </motion.div>
           )}
 
-          {/* ── REVEAL ── */}
+          {/* ══ REVEAL ═════════════════════════════════════════════════════════ */}
           {phase === 'REVEAL' && (
-            <motion.div
-              key="reveal"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.5 }}
-              className="text-center w-full max-w-4xl"
+            <motion.div key="reveal"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              transition={{ duration: 0.45 }}
+              className="text-center w-full max-w-3xl"
             >
-              {/* Trophy */}
               <motion.div
-                initial={{ scale: 0.3, opacity: 0, rotate: -20 }}
+                initial={{ scale: 0.2, opacity: 0, rotate: -30 }}
                 animate={{ scale: 1, opacity: 1, rotate: 0 }}
-                transition={{ type: 'spring', stiffness: 200, damping: 12, delay: 0.1 }}
-                className="flex justify-center mb-6"
+                transition={{ type: 'spring', stiffness: 220, damping: 14, delay: 0.08 }}
+                className="flex justify-center mb-5"
               >
                 <div className="relative">
                   <motion.div
-                    animate={{
-                      scale: [1, 1.3, 1],
-                      opacity: [0.4, 0.8, 0.4],
-                    }}
-                    transition={{ duration: 2.5, repeat: Infinity }}
-                    className="absolute inset-0"
+                    animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 2.2, repeat: Infinity }}
+                    className="absolute rounded-full"
                     style={{
-                      background: 'radial-gradient(circle, rgba(251,191,36,0.5) 0%, transparent 70%)',
-                      filter: 'blur(20px)',
-                      transform: 'scale(2)',
+                      inset: -20,
+                      background: 'radial-gradient(circle, rgba(251,191,36,0.5) 0%, transparent 68%)',
+                      filter: 'blur(16px)',
                     }}
                   />
                   <Trophy
-                    size={72}
-                    className="text-yellow-400 relative"
-                    style={{ filter: 'drop-shadow(0 0 20px rgba(251,191,36,0.6))' }}
+                    size={76}
+                    style={{ color: '#fbbf24', filter: 'drop-shadow(0 0 24px rgba(251,191,36,0.7))', position: 'relative' }}
                   />
                 </div>
               </motion.div>
 
               <motion.p
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.25, duration: 0.5 }}
-                className="text-sm font-bold tracking-[0.25em] uppercase text-white/30 mb-4"
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.28 }}
+                className="mb-5 font-bold uppercase text-sm tracking-[0.22em]"
+                style={{ color: 'rgba(255,255,255,0.50)' }}
               >
                 הנבחרת היא...
               </motion.p>
 
-              {/* Reveal card — dramatic */}
               <motion.div
-                initial={{ scale: 0.85, opacity: 0, y: 30 }}
+                initial={{ scale: 0.8, opacity: 0, y: 36 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
-                transition={{
-                  delay: 0.3,
-                  type: 'spring',
-                  stiffness: 90,
-                  damping: 14,
+                transition={{ delay: 0.32, type: 'spring', stiffness: 95, damping: 13 }}
+                className="mb-8 relative overflow-hidden rounded-[32px] p-12"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(99,102,241,0.18) 0%, rgba(139,92,246,0.12) 50%, rgba(99,102,241,0.08) 100%)',
+                  border: '1.5px solid rgba(165,180,252,0.30)',
+                  boxShadow: '0 0 80px rgba(99,102,241,0.25), 0 24px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.12)',
                 }}
-                className="mb-8"
               >
-                <GlassCard
-                  intensity="high"
-                  className="p-12 relative overflow-hidden"
+                <div
+                  className="absolute top-0 left-[15%] right-[15%] h-px"
+                  style={{ background: 'linear-gradient(90deg, transparent, rgba(165,180,252,0.7), transparent)' }}
+                />
+                <motion.p
+                  initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5, duration: 0.55 }}
+                  className="font-black tracking-tighter italic"
+                  style={{ fontSize: 'clamp(34px, 6vw, 66px)', color: '#ffffff' }}
                 >
-                  {/* Inner glow */}
-                  <div
-                    className="absolute inset-0 pointer-events-none"
-                    style={{
-                      background: 'radial-gradient(ellipse at 50% 0%, rgba(139,92,246,0.15) 0%, transparent 60%)',
-                    }}
-                  />
-                  <motion.p
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.5, duration: 0.5, type: 'spring', stiffness: 100 }}
-                    className="font-black tracking-tighter italic relative"
-                    style={{
-                      fontSize: 'clamp(36px, 6vw, 68px)',
-                      background: 'linear-gradient(160deg, #ffffff 0%, rgba(196,181,253,0.9) 100%)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                    }}
-                  >
-                    "חשפו את התשובה!"
-                  </motion.p>
-                </GlassCard>
+                  "חשפו את התשובה!"
+                </motion.p>
               </motion.div>
 
-              {/* Score chips */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.65, duration: 0.5 }}
-                className="grid grid-cols-2 gap-4 max-w-sm mx-auto"
+                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.68 }}
+                className="grid grid-cols-2 gap-4 max-w-xs mx-auto"
               >
-                <GlassCard intensity="medium" className="p-5 text-right">
-                  <p className="text-xs text-white/35 mb-1 font-medium">הכותב/ת מקבל</p>
-                  <p className="text-3xl font-black text-indigo-300">+2</p>
-                  <p className="text-xs text-white/30">נקודות</p>
-                </GlassCard>
-                <GlassCard intensity="medium" className="p-5 text-right">
-                  <p className="text-xs text-white/35 mb-1 font-medium">ניחוש נכון</p>
-                  <p className="text-3xl font-black text-emerald-400">+1</p>
-                  <p className="text-xs text-white/30">נקודה</p>
-                </GlassCard>
+                <ScoreChip label="הכותב/ת מקבל" value="+2" color="#a5b4fc" />
+                <ScoreChip label="ניחוש נכון" value="+1" color="#6ee7b7" />
               </motion.div>
             </motion.div>
           )}
 
-          {/* ── SUMMARY ── */}
+          {/* ══ SUMMARY ════════════════════════════════════════════════════════ */}
           {phase === 'SUMMARY' && (
-            <motion.div
-              key="summary"
-              initial={{ opacity: 0, scale: 0.95 }}
+            <motion.div key="summary"
+              initial={{ opacity: 0, scale: 0.94 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-              className="text-center max-w-xl"
+              className="text-center max-w-2xl w-full"
             >
               <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.15, duration: 0.6 }}
+                initial={{ scale: 0.3, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: 'spring', stiffness: 200, damping: 13, delay: 0.05 }}
+                className="flex justify-center mb-8"
               >
-                <div className="text-xs font-bold tracking-[0.25em] uppercase text-white/25 mb-5">
-                  המשחק הסתיים
-                </div>
-                <h2
-                  className="font-black tracking-tighter italic mb-4"
+                <div
+                  className="w-20 h-20 rounded-full flex items-center justify-center"
                   style={{
-                    fontSize: 'clamp(60px, 10vw, 120px)',
-                    background: 'linear-gradient(160deg, #fff 30%, rgba(139,92,246,0.7) 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    lineHeight: 0.95,
+                    background: 'rgba(99,102,241,0.12)',
+                    border: '1.5px solid rgba(165,180,252,0.35)',
+                    boxShadow: '0 0 40px rgba(99,102,241,0.3)',
                   }}
+                >
+                  <Zap size={36} style={{ color: '#a5b4fc' }} />
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <p
+                  className="font-bold tracking-[0.2em] uppercase text-xs mb-4"
+                  style={{ color: 'rgba(255,255,255,0.45)' }}
+                >
+                  המשחק הסתיים
+                </p>
+                <h2
+                  className="font-black tracking-tighter italic mb-4 leading-none"
+                  style={{ fontSize: 'clamp(64px, 11vw, 130px)', color: '#ffffff' }}
                 >
                   זהו זה.
                 </h2>
-                <p className="text-xl text-white/35 mb-12">
+                <p className="text-xl mb-12" style={{ color: 'rgba(255,255,255,0.65)' }}>
                   הסיבובים נגמרו — הגיע הזמן לספור נקודות.
                 </p>
               </motion.div>
 
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4, duration: 0.6 }}
+                initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.42 }}
               >
-                <motion.button
-                  onClick={() => { setCurrentIdx(0); setPhase('START'); }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="inline-flex items-center gap-3 px-8 py-4 rounded-full font-bold text-white/70 transition-colors"
-                  style={{
-                    background: 'rgba(255,255,255,0.05)',
-                    border: '1px solid rgba(255,255,255,0.10)',
-                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08)',
-                  }}
-                  onMouseEnter={e => {
-                    (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.09)';
-                  }}
-                  onMouseLeave={e => {
-                    (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.05)';
-                  }}
-                >
-                  <RotateCcw size={17} />
+                <GhostButton onClick={() => { setCurrentIdx(0); setPhase('START'); }}>
+                  <RotateCcw size={16} />
                   שחק שוב
-                </motion.button>
+                </GhostButton>
               </motion.div>
             </motion.div>
           )}
-        </AnimatePresence>
-      </div>
 
-      {/* Host bottom control */}
+        </AnimatePresence>
+      </main>
+
+      {/* ── Host CTA ──────────────────────────────────────────────────────────── */}
       {isHost && phase !== 'SUMMARY' && (
-        <div className="absolute bottom-10 left-0 right-0 flex justify-center z-20">
+        <div className="relative z-10 flex justify-center pb-10 shrink-0">
           <motion.button
-            initial={{ opacity: 0, y: 20 }}
+            key={phase}
+            initial={{ opacity: 0, y: 22 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ delay: 0.55, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
             whileHover={{ scale: 1.04, y: -2 }}
-            whileTap={{ scale: 0.96 }}
+            whileTap={{ scale: 0.97 }}
             onClick={nextPhase}
-            className="group flex items-center gap-4 px-10 py-5 rounded-full font-bold text-lg"
+            className="group flex items-center gap-3.5 px-10 py-5 rounded-full font-bold text-lg"
             style={{
-              background: 'rgba(255,255,255,0.07)',
-              backdropFilter: 'blur(40px)',
-              WebkitBackdropFilter: 'blur(40px)',
-              border: '1px solid rgba(255,255,255,0.13)',
-              boxShadow: '0 8px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.10)',
+              background: 'rgba(99,102,241,0.14)',
+              backdropFilter: 'blur(30px)',
+              WebkitBackdropFilter: 'blur(30px)',
+              border: '1.5px solid rgba(165,180,252,0.32)',
+              color: '#e0e7ff',
+              boxShadow: '0 8px 40px rgba(0,0,0,0.45), 0 0 30px rgba(99,102,241,0.15), inset 0 1px 0 rgba(255,255,255,0.10)',
             }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(99,102,241,0.26)'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(99,102,241,0.14)'; }}
           >
-            <span className="text-white/80 group-hover:text-white transition-colors">
-              {phase === 'REVEAL' && currentIdx < questions.length - 1
-                ? 'לשאלה הבאה'
-                : phase === 'REVEAL'
-                ? 'סיכום'
-                : 'המשך לשלב הבא'}
-            </span>
+            <span>{nextLabel}</span>
             <motion.div
-              animate={{ x: [0, -4, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+              animate={{ x: [0, -5, 0] }}
+              transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
             >
-              <ChevronRight size={20} className="text-indigo-400" />
+              <ChevronRight size={20} style={{ color: '#a5b4fc' }} />
             </motion.div>
           </motion.button>
         </div>
       )}
-
-      {/* Bottom-right hint */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1, duration: 0.8 }}
-        className="absolute bottom-7 right-7 z-10 flex items-center gap-2 text-white/18"
-      >
-        <Info size={13} />
-        <span className="text-[11px] font-semibold uppercase tracking-[0.15em]">
-          {phase === 'QUESTION'
-            ? 'הקריאו את השאלה בקול רם'
-            : 'פעלו לפי ההנחיות על המסך'}
-        </span>
-      </motion.div>
     </div>
   );
 }
