@@ -3,7 +3,7 @@ npm install lucide-react framer-motion canvas-confetti
 npm install -D @types/canvas-confetti
 */
 
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { 
   Trophy, 
@@ -62,31 +62,33 @@ const AmbientOrbs = () => {
     <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
       {/* Primary deep indigo orb - top left */}
       <motion.div
-        style={{ x: orb1X, y: orb1Y }}
+        style={{
+          x: orb1X,
+          y: orb1Y,
+          background: 'radial-gradient(ellipse at center, rgba(79,70,229,0.35) 0%, rgba(67,56,202,0.15) 40%, transparent 75%)',
+          filter: 'blur(80px)',
+        }}
         animate={{
           scale: [1, 1.15, 0.95, 1],
           opacity: [0.25, 0.40, 0.30, 0.25],
         }}
         transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
         className="absolute -top-[15%] -left-[5%] w-[65%] h-[65%] rounded-full"
-        style={{
-          background: 'radial-gradient(ellipse at center, rgba(79,70,229,0.35) 0%, rgba(67,56,202,0.15) 40%, transparent 75%)',
-          filter: 'blur(80px)',
-        }}
       />
       {/* Secondary violet orb - bottom right */}
       <motion.div
-        style={{ x: orb2X, y: orb2Y }}
+        style={{
+          x: orb2X,
+          y: orb2Y,
+          background: 'radial-gradient(ellipse at center, rgba(139,92,246,0.30) 0%, rgba(124,58,237,0.12) 45%, transparent 75%)',
+          filter: 'blur(90px)',
+        }}
         animate={{
           scale: [1.1, 0.9, 1.2, 1.1],
           opacity: [0.20, 0.35, 0.25, 0.20],
         }}
         transition={{ duration: 28, repeat: Infinity, ease: "easeInOut" }}
         className="absolute -bottom-[15%] -right-[5%] w-[55%] h-[55%] rounded-full"
-        style={{
-          background: 'radial-gradient(ellipse at center, rgba(139,92,246,0.30) 0%, rgba(124,58,237,0.12) 45%, transparent 75%)',
-          filter: 'blur(90px)',
-        }}
       />
       {/* Tertiary faint rose accent - center */}
       <motion.div
@@ -232,31 +234,6 @@ const ProgressBar = ({ current, total }: { current: number; total: number }) => 
   </div>
 );
 
-// Staggered letter animation for titles
-const AnimatedTitle = ({ text, className = '' }: { text: string; className?: string }) => {
-  const words = text.split(' ');
-  return (
-    <span className={className} aria-label={text}>
-      {words.map((word, wi) => (
-        <span key={wi} style={{ display: 'inline-block', overflow: 'hidden' }}>
-          <motion.span
-            style={{ display: 'inline-block' }}
-            initial={{ y: '100%', opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{
-              delay: wi * 0.07,
-              duration: 0.7,
-              ease: [0.22, 1, 0.36, 1],
-            }}
-          >
-            {word}
-          </motion.span>
-          {wi < words.length - 1 && <span style={{ display: 'inline-block', width: '0.3em' }} />}
-        </span>
-      ))}
-    </span>
-  );
-};
 
 // --- Main Component ---
 
