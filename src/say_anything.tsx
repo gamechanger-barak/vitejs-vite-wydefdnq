@@ -8,7 +8,6 @@ import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import {
   Trophy,
-  Play,
   ChevronRight,
   Users,
   MessageSquare,
@@ -80,7 +79,7 @@ const AmbientOrbs = () => {
 export default function SayAnything({ gameData, roomId, isHost }: SayAnythingProps) {
   const [phase, setPhase] = useState<GamePhase>('START');
   const [currentIdx, setCurrentIdx] = useState(0);
-  const [flash, setFlash] = useState(false);
+  const [, setFlash] = useState(false);
 
   const questions = useMemo(() => {
     if (Array.isArray(gameData)) return gameData;
