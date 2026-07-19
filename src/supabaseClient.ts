@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import { createClient } from '@supabase/supabase-js';
 
 // משיכת המפתחות מקובץ ה-env.
