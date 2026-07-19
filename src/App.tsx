@@ -1,6 +1,6 @@
-import { useRoute } from '@/lib/useRoute';
-import CreatorApp from '@/components/creator/CreatorApp';
-import PlayerView from '@/components/player/PlayerView';
+import { useRoute } from './lib/useRoute';
+import CreatorApp from './components/creator/CreatorApp';
+import PlayerView from './components/player/PlayerView';
 
 export default function App() {
   const route = useRoute();
